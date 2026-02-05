@@ -1,5 +1,6 @@
 const barthyImage = document.getElementById("barthyImage");
 const meepsImage = document.getElementById("meepsImage");
+const sceneImage = document.getElementById("sceneImage");
 
 const barthyBox = document.getElementById("barthyBox");
 const meepsBox = document.getElementById("meepsBox");
@@ -15,24 +16,68 @@ const modalYes = document.getElementById("modalYes");
 const modalNo = document.getElementById("modalNo");
 
 let currentState = null;
-let barthyBaseImage = null;
 
-/* -------- VISIBILITY HELPERS -------- */
+/* -------- Helpers -------- */
 
 function showBarthy() {
-  barthyImage.style.display = "block";
+  barthyImage.style.visibility = "visible";
+  barthyImage.style.opacity = "1";
 }
 
 function hideBarthy() {
-  barthyImage.style.display = "none";
+  barthyImage.style.visibility = "hidden";
+  barthyImage.style.opacity = "0";
 }
 
+
 function showMeeps() {
-  meepsImage.style.display = "block";
+  meepsImage.style.visibility = "visible";
+  meepsImage.style.opacity = "1";
 }
 
 function hideMeeps() {
-  meepsImage.style.display = "none";
+  meepsImage.style.visibility = "hidden";
+  meepsImage.style.opacity = "0";
+}
+
+
+function showScene(src) {
+  sceneImage.src = src;
+  sceneImage.classList.remove("hidden");
+}
+
+function hideScene() {
+  sceneImage.classList.add("hidden");
+}
+
+function hideDialogue() {
+  barthyBox.classList.add("hidden");
+  meepsBox.classList.add("hidden");
+}
+
+function showChoices() {
+  yesBtn.style.display = "inline-block";
+  noBtn.style.display = "inline-block";
+}
+
+function hideChoices() {
+  yesBtn.style.display = "none";
+  noBtn.style.display = "none";
+}
+
+function showModalPrompt({ text, yes, no }) {
+  modalText.textContent = text;
+  modal.classList.remove("hidden");
+
+  modalYes.onclick = () => {
+    modal.classList.add("hidden");
+    goToState(yes);
+  };
+
+  modalNo.onclick = () => {
+    modal.classList.add("hidden");
+    goToState(no);
+  };
 }
 
 /* -------- STATES -------- */
@@ -47,6 +92,7 @@ const states = {
   },
 
   meeps_hi: {
+    keepCharacters: true,
     speaker: "meeps",
     text: "Hi Barthy",
     next: "barthy_meeps_walking"
@@ -54,14 +100,11 @@ const states = {
 
   barthy_meeps_walking: {
     barthyImage: "assets/barthy_walking.png",
-    meepsImage: "assets/meeps_walking.png",
-    next: "hug"
+    meepsImage: "assets/meeps_walking.png"
   },
 
   hug: {
-    barthyImage: null,
-    meepsImage: "assets/hug.png",
-    speaker: "barthy",
+    sceneImage: "assets/hug.png",
     next: "ask_valentine"
   },
 
@@ -122,10 +165,7 @@ const states = {
   },
 
   kiss_repeat: {
-    barthyImage: null,
-    meepsImage: null,
-    speaker: "meeps",
-    text: "*Meeps kisses Barthy. They hug.*",
+    sceneImage: "assets/kiss.png",
     next: "ask_valentine_again"
   },
 
@@ -166,68 +206,57 @@ function goToState(stateKey) {
   const state = states[stateKey];
   currentState = stateKey;
 
-  showBothCharacters();
+  hideScene();
+  hideDialogue();
+  hideChoices();
 
-  /* Barthy handling */
-  if (state.barthyImage === null) {
+  if (state.sceneImage) {
     hideBarthy();
-  } else if (state.barthyImage) {
-    showBarthy();
-    barthyImage.src = state.barthyImage;
-    barthyBaseImage = state.barthyImage;
-  }
-
-
-  /* Meeps handling */
-  if (state.meepsImage === null) {
     hideMeeps();
-  } else if (state.meepsImage) {
-    showMeeps();
-    meepsImage.src = state.meepsImage;
+    showScene(state.sceneImage);
+  } else {
+    hideScene();
 
-    // Center hug images (when Barthy is hidden)
-    if (state.barthyImage === null) {
-        meepsImage.classList.add("center");
+    if (state.keepCharacters) {
+      showBarthy();
+      showMeeps();
     } else {
-        meepsImage.classList.remove("center");
+      if (state.barthyImage) {
+        setImageSafely(barthyImage, state.barthyImage, showBarthy);
+      } else {
+        hideBarthy();
+      }
+
+      if (state.meepsImage) {
+        setImageSafely(meepsImage, state.meepsImage, showMeeps);
+      } else {
+        hideMeeps();
+      }
     }
   }
 
-    // Walking cutscene
   if (stateKey === "barthy_meeps_walking") {
-    hideDialogue();
-    hideChoices();
-    hideModal();
-
     barthyImage.classList.add("walking-left");
     meepsImage.classList.add("walking-right");
 
-    // After animation finishes → hug
     setTimeout(() => {
       barthyImage.classList.remove("walking-left");
       meepsImage.classList.remove("walking-right");
       goToState("hug");
     }, 1200);
-
-    return; // prevent normal auto-next
+    return;
   }
-
-
-  hideDialogue();
-  hideChoices();
-  hideModal();
 
   if (state.speaker && state.text) {
-  if (state.speaker === "barthy") {
-    barthyText.textContent = state.text;
-    barthyBox.classList.remove("hidden");
+    if (state.speaker === "barthy") {
+      barthyText.textContent = state.text;
+      barthyBox.classList.remove("hidden");
+    }
+    if (state.speaker === "meeps") {
+      meepsText.textContent = state.text;
+      meepsBox.classList.remove("hidden");
+    }
   }
-
-  if (state.speaker === "meeps") {
-    meepsText.textContent = state.text;
-    meepsBox.classList.remove("hidden");
-  }
-}
 
   if (state.choices) {
     showChoices();
@@ -235,7 +264,7 @@ function goToState(stateKey) {
   }
 
   if (state.modal) {
-    setTimeout(() => showModal(state.modal), 1000);
+    setTimeout(() => showModalPrompt(state.modal), 800);
     return;
   }
 
@@ -244,51 +273,28 @@ function goToState(stateKey) {
   }
 }
 
-function showBothCharacters() {
-  barthyImage.style.display = "block";
-  meepsImage.style.display = "block";
+function setImageSafely(imgEl, src, showFn) {
+  imgEl.style.visibility = "hidden";
+  imgEl.style.opacity = "0";
+
+  // Clear previous handler
+  imgEl.onload = null;
+
+  // Assign src first
+  imgEl.src = src;
+
+  // If already loaded (cached)
+  if (imgEl.complete) {
+    showFn();
+  } else {
+    imgEl.onload = () => {
+      showFn();
+    };
+  }
 }
 
 
-/* -------- MODAL -------- */
-
-function showModal({ text, yes, no }) {
-  modalText.textContent = text;
-  modal.classList.remove("hidden");
-
-  modalYes.onclick = () => {
-    hideModal();
-    goToState(yes);
-  };
-
-  modalNo.onclick = () => {
-    hideModal();
-    goToState(no);
-  };
-}
-
-function hideModal() {
-  modal.classList.add("hidden");
-}
-
-/* -------- UI -------- */
-
-function hideDialogue() {
-  barthyBox.classList.add("hidden");
-  meepsBox.classList.add("hidden");
-}
-
-function showChoices() {
-  yesBtn.style.display = "inline-block";
-  noBtn.style.display = "inline-block";
-}
-
-function hideChoices() {
-  yesBtn.style.display = "none";
-  noBtn.style.display = "none";
-}
-
-/* -------- HOVER EFFECTS -------- */
+/* -------- Hover -------- */
 
 yesBtn.addEventListener("mouseenter", () => {
   if (currentState === "ask_valentine") {
@@ -302,18 +308,10 @@ noBtn.addEventListener("mouseenter", () => {
   }
 });
 
+/* -------- Clicks -------- */
 
-/* -------- EVENTS -------- */
-
-yesBtn.addEventListener("click", () => {
-  goToState("yes_happy");
-});
-
-noBtn.addEventListener("click", () => {
-  barthyImage.classList.add("shake");
-  setTimeout(() => barthyImage.classList.remove("shake"), 400);
-  goToState("no_cry");
-});
+yesBtn.addEventListener("click", () => goToState("yes_happy"));
+noBtn.addEventListener("click", () => goToState("no_cry"));
 
 /* -------- START -------- */
 

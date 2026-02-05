@@ -6,7 +6,6 @@
 body {
   margin: 0;
   background: linear-gradient(135deg, #9ec57c, #fff0f6);
-  /* background: linear-gradient(135deg, #ffd6e7, #fff0f6); */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,44 +28,45 @@ body {
   padding: 0 10px;
 }
 
+/* Characters */
+
 .character {
   max-height: 100%;
   max-width: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
-  transition: all 0.4s ease;
+  transition: transform 0.4s ease;
+  opacity: 1;
+  visibility: visible;
+  /* transition: opacity 0.15s ease, transform 0.4s ease; */
 }
 
-
-.character.left {
-  align-self: flex-end;
-}
-
+.character.left,
 .character.right {
   align-self: flex-end;
 }
 
-.character.center {
-  margin: 0 auto;
+/* Scene image (hug, kiss, etc.) */
+
+.scene-image {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  z-index: 5;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.15s ease;
 }
 
-/* Optional emphasis
-.focus {
-  transform: scale(1.05);
+.hidden {
+  opacity: 0;
+  visibility: hidden;
 }
-
-.dim {
-  opacity: 0.5;
-} */
-
-
-
-/* #scene img {
-  width: 100%;
-  border-radius: 16px;
-  transition: all 0.4s ease;
-} */
 
 /* Dialogue */
 
@@ -96,10 +96,7 @@ body {
   background: #ffe6f0;
 }
 
-.hidden {
-  display: none;
-}
-
+/* Choices */
 
 #choices {
   display: flex;
@@ -113,7 +110,7 @@ button {
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 #yesBtn {
@@ -130,6 +127,7 @@ button {
 }
 
 /* Animations */
+
 .shake {
   animation: shake 0.4s;
 }
@@ -151,27 +149,22 @@ button {
 }
 
 @keyframes walkRight {
-  from { transform: translateX(0); }
   to { transform: translateX(80px); }
 }
 
 @keyframes walkLeft {
-  from { transform: translateX(0); }
   to { transform: translateX(-80px); }
 }
 
-
-/* MODAL FIX */
+/* Modal */
 
 #modal {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   z-index: 999;
 }
 
@@ -186,11 +179,4 @@ button {
   text-align: center;
   width: 80%;
   max-width: 320px;
-
-  z-index: 1000;
-  pointer-events: auto;
-}
-
-#modal * {
-  pointer-events: auto;
 }
