@@ -1,4 +1,5 @@
-const sceneImage = document.getElementById("sceneImage");
+const barthyImage = document.getElementById("barthyImage");
+const meepsImage = document.getElementById("meepsImage");
 
 const barthyBox = document.getElementById("barthyBox");
 const meepsBox = document.getElementById("meepsBox");
@@ -19,42 +20,48 @@ let currentState = null;
 
 const states = {
   intro: {
-    image: "assets/barthy.png",
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
     speaker: "barthy",
     text: "Meepssss",
     next: "meeps_hi"
   },
 
   meeps_hi: {
-    image: "assets/meeps.png",
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
     speaker: "meeps",
     text: "Hi Barthy",
     next: "hug"
   },
 
   hug: {
-    image: "assets/barthy.png",
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
     speaker: "barthy",
     text: "*Barthy and Meeps hug*",
     next: "ask_valentine"
   },
 
   ask_valentine: {
-    image: "barthy_neutral.jpeg",
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
     speaker: "barthy",
     text: "Would you be my valentines?",
     choices: true
   },
 
   no_cry: {
-    image: "barthy_cry.jpeg",
+    barthyImage: "assets/barthy_cry.png",
+    meepsImage: "assets/meeps_sad.png",
     speaker: "barthy",
     text: "Barthy sad… Barthy lonely…",
     next: "walk_away"
   },
 
   walk_away: {
-    image: "barthy_walk.jpeg",
+    barthyImage: "assets/barthy_walk.png",
+    meepsImage: "assets/meeps_sad.png",
     speaker: "barthy",
     text: "*Barthy starts walking away*",
     modal: {
@@ -65,21 +72,24 @@ const states = {
   },
 
   meeps_calls_back: {
-    image: "meeps_calling.jpeg",
+    barthyImage: "assets/barthy_turn.png",
+    meepsImage: "assets/meeps_calling.png",
     speaker: "meeps",
     text: "Wait Barthy, come back!",
     next: "barthy_returns"
   },
 
   barthy_returns: {
-    image: "barthy_smile.jpeg",
+    barthyImage: "assets/barthy_smile.png",
+    meepsImage: "assets/meeps_smile.png",
     speaker: "meeps",
     text: "Ask me again.. Hehhe",
     next: "ask_valentine"
   },
 
   barthy_faint: {
-    image: "barthy_faint.jpeg",
+    barthyImage: "assets/barthy_faint.png",
+    meepsImage: "assets/meeps_shocked.png",
     speaker: "barthy",
     text: "*Barthy faints*",
     modal: {
@@ -90,46 +100,65 @@ const states = {
   },
 
   kiss_repeat: {
-    image: "kiss.jpeg",
+    barthyImage: "assets/barthy_happy.png",
+    meepsImage: "assets/meeps_happy.png",
     speaker: "meeps",
     text: "*Meeps kisses Barthy. They hug.*",
     next: "ask_valentine_again"
   },
 
   ask_valentine_again: {
-    image: "barthy_smile.jpeg",
+    barthyImage: "assets/barthy_neutral.png",
+    meepsImage: "assets/meeps_tease.png",
     speaker: "meeps",
     text: "Ask me again.. hehe",
     next: "ask_valentine"
   },
 
   yes_happy: {
-    image: "barthy_happy.jpeg",
+    barthyImage: "assets/barthy_excited.png",
+    meepsImage: "assets/meeps_happy.png",
     speaker: "barthy",
     text: "Yaay! I'm so excited to be your valentines",
     next: "end_happy"
   },
 
   end_happy: {
-    image: "photo.jpeg",
+    barthyImage: "assets/barthy_happy.png",
+    meepsImage: "assets/meeps_happy.png",
     speaker: "meeps",
     text: "Pottery. Candles. Dinner. Valentines together"
   },
 
   end_sad: {
-    image: "photo.jpeg",
+    barthyImage: "assets/barthy_sad.png",
+    meepsImage: "assets/meeps_sad.png",
     speaker: "barthy",
     text: "Oh well… maybe next year"
   }
 };
 
-/* -------- CORE LOGIC -------- */
+/* -------- CORE -------- */
 
 function goToState(stateKey) {
   const state = states[stateKey];
   currentState = stateKey;
 
-  sceneImage.src = state.image;
+  if (state.barthyImage) barthyImage.src = state.barthyImage;
+  if (state.meepsImage) meepsImage.src = state.meepsImage;
+
+  barthyImage.classList.remove("focus", "dim");
+  meepsImage.classList.remove("focus", "dim");
+
+  if (state.speaker === "barthy") {
+    barthyImage.classList.add("focus");
+    meepsImage.classList.add("dim");
+  }
+
+  if (state.speaker === "meeps") {
+    meepsImage.classList.add("focus");
+    barthyImage.classList.add("dim");
+  }
 
   hideDialogue();
   hideChoices();
@@ -200,25 +229,13 @@ function hideChoices() {
 
 /* -------- EVENTS -------- */
 
-yesBtn.addEventListener("mouseenter", () => {
-  if (currentState === "ask_valentine") {
-    sceneImage.src = "barthy_happy.jpeg";
-  }
-});
-
-noBtn.addEventListener("mouseenter", () => {
-  if (currentState === "ask_valentine") {
-    sceneImage.src = "barthy_sad.jpeg";
-  }
-});
-
 yesBtn.addEventListener("click", () => {
   goToState("yes_happy");
 });
 
 noBtn.addEventListener("click", () => {
-  sceneImage.classList.add("shake");
-  setTimeout(() => sceneImage.classList.remove("shake"), 400);
+  barthyImage.classList.add("shake");
+  setTimeout(() => barthyImage.classList.remove("shake"), 400);
   goToState("no_cry");
 });
 

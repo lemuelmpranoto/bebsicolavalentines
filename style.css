@@ -20,8 +20,39 @@ body {
 }
 
 #scene {
+  position: relative;
+  height: 300px;
   margin-bottom: 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px;
 }
+
+.character {
+  max-height: 100%;
+  width: auto;
+  transition: all 0.4s ease;
+}
+
+.character.left {
+  align-self: flex-end;
+}
+
+.character.right {
+  align-self: flex-end;
+}
+
+/* Optional emphasis
+.focus {
+  transform: scale(1.05);
+}
+
+.dim {
+  opacity: 0.5;
+} */
+
+
 
 #scene img {
   width: 100%;
