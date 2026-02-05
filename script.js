@@ -1,5 +1,10 @@
 const sceneImage = document.getElementById("sceneImage");
-const text = document.getElementById("text");
+
+const barthyBox = document.getElementById("barthyBox");
+const meepsBox = document.getElementById("meepsBox");
+const barthyText = document.getElementById("barthyText");
+const meepsText = document.getElementById("meepsText");
+
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 
@@ -15,46 +20,67 @@ let currentState = null;
 const states = {
   intro: {
     image: "assets/barthy.png",
-    text: "Barthy: Meepssss",
+    speaker: "barthy",
+    text: "Meepssss",
     next: "meeps_hi"
   },
 
   meeps_hi: {
-    image: "photo.jpeg",
-    text: "Meeps: Hi Barthy",
+    image: "assets/meeps.png",
+    speaker: "meeps",
+    text: "Hi Barthy",
     next: "hug"
   },
 
   hug: {
-    image: "photo.jpeg",
+    image: "assets/barthy.png",
+    speaker: "barthy",
     text: "*Barthy and Meeps hug*",
     next: "ask_valentine"
   },
 
   ask_valentine: {
     image: "barthy_neutral.jpeg",
-    text: "Barthy: Would you be my valentines?",
+    speaker: "barthy",
+    text: "Would you be my valentines?",
     choices: true
   },
 
   no_cry: {
     image: "barthy_cry.jpeg",
+    speaker: "barthy",
     text: "Barthy sad… Barthy lonely…",
     next: "walk_away"
   },
 
   walk_away: {
-  image: "barthy_walk.jpeg",
-  text: "*Barthy starts walking away*",
-  modal: {
-    text: "Is Meeps really letting Barthy walk away heartbroken?",
-    yes: "barthy_faint",
-    no: "meeps_calls_back"
-  }
-},
+    image: "barthy_walk.jpeg",
+    speaker: "barthy",
+    text: "*Barthy starts walking away*",
+    modal: {
+      text: "Is Meeps really letting Barthy walk away heartbroken?",
+      yes: "barthy_faint",
+      no: "meeps_calls_back"
+    }
+  },
+
+  meeps_calls_back: {
+    image: "meeps_calling.jpeg",
+    speaker: "meeps",
+    text: "Wait Barthy, come back!",
+    next: "barthy_returns"
+  },
+
+  barthy_returns: {
+    image: "barthy_smile.jpeg",
+    speaker: "meeps",
+    text: "Ask me again.. Hehhe",
+    next: "ask_valentine"
+  },
 
   barthy_faint: {
     image: "barthy_faint.jpeg",
+    speaker: "barthy",
     text: "*Barthy faints*",
     modal: {
       text: "Is Meeps gonna help Barthy????",
@@ -65,41 +91,34 @@ const states = {
 
   kiss_repeat: {
     image: "kiss.jpeg",
+    speaker: "meeps",
     text: "*Meeps kisses Barthy. They hug.*",
     next: "ask_valentine_again"
   },
 
   ask_valentine_again: {
     image: "barthy_smile.jpeg",
-    text: "Meeps: Ask me again.. hehe",
-    next: "ask_valentine"
-  },
-
-  meeps_calls_back: {
-    image: "meeps_calling.jpeg",
-    text: 'Meeps: "Wait Barthy, come back!"',
-    next: "barthy_returns"
-    },
-
-  barthy_returns: {
-    image: "barthy_smile.jpeg",
-    text: 'Meeps: "Ask me again.. Hehhe"',
+    speaker: "meeps",
+    text: "Ask me again.. hehe",
     next: "ask_valentine"
   },
 
   yes_happy: {
     image: "barthy_happy.jpeg",
-    text: "Barthy: Yaay! I'm so excited to be your valentines",
+    speaker: "barthy",
+    text: "Yaay! I'm so excited to be your valentines",
     next: "end_happy"
   },
 
   end_happy: {
     image: "photo.jpeg",
+    speaker: "meeps",
     text: "Pottery. Candles. Dinner. Valentines together"
   },
 
   end_sad: {
     image: "photo.jpeg",
+    speaker: "barthy",
     text: "Oh well… maybe next year"
   }
 };
@@ -111,25 +130,31 @@ function goToState(stateKey) {
   currentState = stateKey;
 
   sceneImage.src = state.image;
-  text.textContent = state.text || "";
 
-  // Hide everything by default
+  hideDialogue();
   hideChoices();
   hideModal();
 
-  // Show choice buttons only when needed
+  if (state.speaker === "barthy") {
+    barthyText.textContent = state.text;
+    barthyBox.classList.remove("hidden");
+  }
+
+  if (state.speaker === "meeps") {
+    meepsText.textContent = state.text;
+    meepsBox.classList.remove("hidden");
+  }
+
   if (state.choices) {
     showChoices();
     return;
   }
 
-  // Show modal if state has one
   if (state.modal) {
     setTimeout(() => showModal(state.modal), 1000);
     return;
   }
 
-  // Auto-advance if next exists
   if (state.next) {
     setTimeout(() => goToState(state.next), 1500);
   }
@@ -156,7 +181,12 @@ function hideModal() {
   modal.classList.add("hidden");
 }
 
-/* -------- CHOICES -------- */
+/* -------- UI -------- */
+
+function hideDialogue() {
+  barthyBox.classList.add("hidden");
+  meepsBox.classList.add("hidden");
+}
 
 function showChoices() {
   yesBtn.style.display = "inline-block";
