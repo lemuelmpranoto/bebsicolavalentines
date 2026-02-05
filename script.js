@@ -44,7 +44,7 @@ const states = {
   },
 
   ask_valentine: {
-    barthyImage: "assets/barthy.png",
+    barthyImage: "assets/barthy_bouquet.png",
     meepsImage: "assets/meeps.png",
     speaker: "barthy",
     text: "Would you be my valentines?",
@@ -144,20 +144,12 @@ function goToState(stateKey) {
   const state = states[stateKey];
   currentState = stateKey;
 
-  if (state.barthyImage) barthyImage.src = state.barthyImage;
-  if (state.meepsImage) meepsImage.src = state.meepsImage;
-
-  barthyImage.classList.remove("focus", "dim");
-  meepsImage.classList.remove("focus", "dim");
-
-  if (state.speaker === "barthy") {
-    barthyImage.classList.add("focus");
-    meepsImage.classList.add("dim");
+  if (state.barthyImage) {
+    barthyImage.src = state.barthyImage;
   }
 
-  if (state.speaker === "meeps") {
-    meepsImage.classList.add("focus");
-    barthyImage.classList.add("dim");
+  if (state.meepsImage) {
+    meepsImage.src = state.meepsImage;
   }
 
   hideDialogue();
@@ -226,6 +218,21 @@ function hideChoices() {
   yesBtn.style.display = "none";
   noBtn.style.display = "none";
 }
+
+/* -------- HOVER EFFECTS -------- */
+
+yesBtn.addEventListener("mouseenter", () => {
+  if (currentState === "ask_valentine") {
+    barthyImage.src = "assets/barthy_bouquet_happy.png";
+  }
+});
+
+noBtn.addEventListener("mouseenter", () => {
+  if (currentState === "ask_valentine") {
+    barthyImage.src = "assets/barthy_bouquet_sad.png";
+  }
+});
+
 
 /* -------- EVENTS -------- */
 
