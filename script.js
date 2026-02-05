@@ -16,8 +16,12 @@ const modalYes = document.getElementById("modalYes");
 const modalNo = document.getElementById("modalNo");
 
 let currentState = null;
+let animationTimeout = null;
 
-/* -------- Helpers -------- */
+
+/* =====================================================
+   IMAGE HELPERS
+===================================================== */
 
 function showBarthy() {
   barthyImage.style.visibility = "visible";
@@ -29,7 +33,6 @@ function hideBarthy() {
   barthyImage.style.opacity = "0";
 }
 
-
 function showMeeps() {
   meepsImage.style.visibility = "visible";
   meepsImage.style.opacity = "1";
@@ -40,7 +43,6 @@ function hideMeeps() {
   meepsImage.style.opacity = "0";
 }
 
-
 function showScene(src) {
   sceneImage.src = src;
   sceneImage.classList.remove("hidden");
@@ -50,9 +52,44 @@ function hideScene() {
   sceneImage.classList.add("hidden");
 }
 
+function setImageSafely(imgEl, src, showFn) {
+
+  imgEl.style.visibility = "hidden";
+  imgEl.style.opacity = "0";
+
+  imgEl.onload = null;
+  imgEl.src = src;
+
+  if (imgEl.complete) {
+    showFn();
+  } else {
+    imgEl.onload = showFn;
+  }
+}
+
+
+/* =====================================================
+   UI HELPERS
+===================================================== */
+
 function hideDialogue() {
   barthyBox.classList.add("hidden");
   meepsBox.classList.add("hidden");
+}
+
+function showDialogue(speaker, text) {
+
+  if (!speaker || !text) return;
+
+  if (speaker === "barthy") {
+    barthyText.textContent = text;
+    barthyBox.classList.remove("hidden");
+  }
+
+  if (speaker === "meeps") {
+    meepsText.textContent = text;
+    meepsBox.classList.remove("hidden");
+  }
 }
 
 function showChoices() {
@@ -65,7 +102,13 @@ function hideChoices() {
   noBtn.style.display = "none";
 }
 
+
+/* =====================================================
+   MODAL SYSTEM
+===================================================== */
+
 function showModalPrompt({ text, yes, no }) {
+
   modalText.textContent = text;
   modal.classList.remove("hidden");
 
@@ -80,9 +123,150 @@ function showModalPrompt({ text, yes, no }) {
   };
 }
 
-/* -------- STATES -------- */
+
+/* =====================================================
+   ANIMATION SYSTEM
+===================================================== */
+
+function playAnimation(animation) {
+
+  if (!animation) return;
+
+  const { type, duration, next } = animation;
+
+  if (type === "walkTogether") {
+
+    barthyImage.classList.add("walking-left");
+    meepsImage.classList.add("walking-right");
+
+  }
+
+  if (type === "fall") {
+
+    barthyImage.classList.add("fall");
+
+  }
+
+  animationTimeout = setTimeout(() => {
+
+    barthyImage.classList.remove("walking-left", "fall");
+    meepsImage.classList.remove("walking-right");
+
+    if (next) goToState(next);
+
+  }, duration);
+}
+
+
+/* =====================================================
+   STATE ENGINE
+===================================================== */
+
+function goToState(stateKey) {
+
+  const state = states[stateKey];
+  currentState = stateKey;
+
+  if (animationTimeout) {
+    clearTimeout(animationTimeout);
+  }
+
+  hideScene();
+  hideDialogue();
+  hideChoices();
+
+  /* ---------- SCENE MODE ---------- */
+
+  if (state.sceneImage) {
+
+    hideBarthy();
+    hideMeeps();
+
+    showScene(state.sceneImage);
+
+  }
+
+  /* ---------- CHARACTER MODE ---------- */
+
+  else {
+
+    hideScene();
+
+    if (state.keepCharacters) {
+
+      showBarthy();
+      showMeeps();
+
+    } else {
+
+      if (state.barthyImage) {
+        setImageSafely(barthyImage, state.barthyImage, showBarthy);
+      } else {
+        hideBarthy();
+      }
+
+      if (state.meepsImage) {
+        setImageSafely(meepsImage, state.meepsImage, showMeeps);
+      } else {
+        hideMeeps();
+      }
+
+    }
+
+  }
+
+  /* ---------- DIALOGUE ---------- */
+
+  showDialogue(state.speaker, state.text);
+
+
+  /* ---------- CHOICES ---------- */
+
+  if (state.choices) {
+    showChoices();
+    return;
+  }
+
+
+  /* ---------- MODAL ---------- */
+
+  if (state.modal) {
+
+    setTimeout(() => {
+      showModalPrompt(state.modal);
+    }, 600);
+
+    return;
+  }
+
+
+  /* ---------- ANIMATION ---------- */
+
+  if (state.animation) {
+    playAnimation(state.animation);
+    return;
+  }
+
+
+  /* ---------- AUTO NEXT ---------- */
+
+  if (state.next) {
+
+    animationTimeout = setTimeout(() => {
+      goToState(state.next);
+    }, state.delay || 1500);
+
+  }
+
+}
+
+
+/* =====================================================
+   STATES
+===================================================== */
 
 const states = {
+
   intro: {
     barthyImage: "assets/barthy.png",
     meepsImage: "assets/meeps.png",
@@ -100,11 +284,18 @@ const states = {
 
   barthy_meeps_walking: {
     barthyImage: "assets/barthy_walking.png",
-    meepsImage: "assets/meeps_walking.png"
+    meepsImage: "assets/meeps_walking.png",
+
+    animation: {
+      type: "walkTogether",
+      duration: 1200,
+      next: "hug"
+    }
   },
 
   hug: {
     sceneImage: "assets/hug.png",
+    delay: 1000,
     next: "ask_valentine"
   },
 
@@ -112,51 +303,44 @@ const states = {
     barthyImage: "assets/barthy_bouquet.png",
     meepsImage: "assets/meeps.png",
     speaker: "barthy",
-    text: "Would you be my valentines?",
+    text: "Will you be my valentines?",
     choices: true
   },
 
   no_cry: {
-    barthyImage: "assets/barthy_cry.png",
-    meepsImage: "assets/meeps_sad.png",
+    barthyImage: "assets/barthy_sad.png",
+    meepsImage: "assets/meeps.png",
     speaker: "barthy",
     text: "Barthy sad… Barthy lonely…",
     next: "walk_away"
   },
 
   walk_away: {
-    barthyImage: "assets/barthy_walk.png",
-    meepsImage: "assets/meeps_sad.png",
-    speaker: "barthy",
-    text: "*Barthy starts walking away*",
+    barthyImage: "assets/barthy_walking_sad.png",
+    meepsImage: "assets/meeps.png",
+
     modal: {
       text: "Is Meeps really letting Barthy walk away heartbroken?",
-      yes: "barthy_faint",
+      yes: "barthy_falling",
       no: "meeps_calls_back"
     }
   },
 
-  meeps_calls_back: {
-    barthyImage: "assets/barthy_turn.png",
-    meepsImage: "assets/meeps_calling.png",
-    speaker: "meeps",
-    text: "Wait Barthy, come back!",
-    next: "barthy_returns"
-  },
+  barthy_falling: {
+    barthyImage: "assets/barthy_falling.png",
+    meepsImage: "assets/meeps_walking.png",
 
-  barthy_returns: {
-    barthyImage: "assets/barthy_smile.png",
-    meepsImage: "assets/meeps_smile.png",
-    speaker: "meeps",
-    text: "Ask me again.. Hehhe",
-    next: "ask_valentine"
+    animation: {
+      type: "fall",
+      duration: 800,
+      next: "barthy_faint"
+    }
   },
 
   barthy_faint: {
     barthyImage: "assets/barthy_faint.png",
     meepsImage: "assets/meeps_shocked.png",
-    speaker: "barthy",
-    text: "*Barthy faints*",
+
     modal: {
       text: "Is Meeps gonna help Barthy????",
       yes: "kiss_repeat",
@@ -198,121 +382,41 @@ const states = {
     speaker: "barthy",
     text: "Oh well… maybe next year"
   }
+
 };
 
-/* -------- CORE -------- */
 
-function goToState(stateKey) {
-  const state = states[stateKey];
-  currentState = stateKey;
-
-  hideScene();
-  hideDialogue();
-  hideChoices();
-
-  if (state.sceneImage) {
-    hideBarthy();
-    hideMeeps();
-    showScene(state.sceneImage);
-  } else {
-    hideScene();
-
-    if (state.keepCharacters) {
-      showBarthy();
-      showMeeps();
-    } else {
-      if (state.barthyImage) {
-        setImageSafely(barthyImage, state.barthyImage, showBarthy);
-      } else {
-        hideBarthy();
-      }
-
-      if (state.meepsImage) {
-        setImageSafely(meepsImage, state.meepsImage, showMeeps);
-      } else {
-        hideMeeps();
-      }
-    }
-  }
-
-  if (stateKey === "barthy_meeps_walking") {
-    barthyImage.classList.add("walking-left");
-    meepsImage.classList.add("walking-right");
-
-    setTimeout(() => {
-      barthyImage.classList.remove("walking-left");
-      meepsImage.classList.remove("walking-right");
-      goToState("hug");
-    }, 1200);
-    return;
-  }
-
-  if (state.speaker && state.text) {
-    if (state.speaker === "barthy") {
-      barthyText.textContent = state.text;
-      barthyBox.classList.remove("hidden");
-    }
-    if (state.speaker === "meeps") {
-      meepsText.textContent = state.text;
-      meepsBox.classList.remove("hidden");
-    }
-  }
-
-  if (state.choices) {
-    showChoices();
-    return;
-  }
-
-  if (state.modal) {
-    setTimeout(() => showModalPrompt(state.modal), 800);
-    return;
-  }
-
-  if (state.next) {
-    setTimeout(() => goToState(state.next), 1500);
-  }
-}
-
-function setImageSafely(imgEl, src, showFn) {
-  imgEl.style.visibility = "hidden";
-  imgEl.style.opacity = "0";
-
-  // Clear previous handler
-  imgEl.onload = null;
-
-  // Assign src first
-  imgEl.src = src;
-
-  // If already loaded (cached)
-  if (imgEl.complete) {
-    showFn();
-  } else {
-    imgEl.onload = () => {
-      showFn();
-    };
-  }
-}
-
-
-/* -------- Hover -------- */
+/* =====================================================
+   HOVER EVENTS
+===================================================== */
 
 yesBtn.addEventListener("mouseenter", () => {
+
   if (currentState === "ask_valentine") {
     barthyImage.src = "assets/barthy_bouquet_happy.png";
   }
+
 });
 
 noBtn.addEventListener("mouseenter", () => {
+
   if (currentState === "ask_valentine") {
     barthyImage.src = "assets/barthy_bouquet_sad.png";
   }
+
 });
 
-/* -------- Clicks -------- */
 
-yesBtn.addEventListener("click", () => goToState("yes_happy"));
-noBtn.addEventListener("click", () => goToState("no_cry"));
+/* =====================================================
+   CLICK EVENTS
+===================================================== */
 
-/* -------- START -------- */
+yesBtn.onclick = () => goToState("yes_happy");
+noBtn.onclick = () => goToState("no_cry");
+
+
+/* =====================================================
+   START GAME
+===================================================== */
 
 goToState("intro");
