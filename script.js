@@ -200,13 +200,38 @@ function goToState(stateKey) {
     } else {
 
       if (state.barthyImage) {
-        setImageSafely(barthyImage, state.barthyImage, showBarthy);
-      } else {
+
+        barthyImage.classList.remove("scale-small", "scale-large");
+
+        setImageSafely(barthyImage, state.barthyImage, () => {
+
+          showBarthy();
+
+          if (state.barthyScale) {
+            barthyImage.classList.add(state.barthyScale);
+          }
+
+        });
+
+      }
+      else {
         hideBarthy();
       }
 
       if (state.meepsImage) {
-        setImageSafely(meepsImage, state.meepsImage, showMeeps);
+
+        meepsImage.classList.remove("scale-small", "scale-large");
+
+        setImageSafely(meepsImage, state.meepsImage, () => {
+
+          showMeeps();
+
+          if (state.meepsScale) {
+            meepsImage.classList.add(state.meepsScale);
+          }
+
+        });
+
       } else {
         hideMeeps();
       }
@@ -270,13 +295,19 @@ const states = {
   intro: {
     barthyImage: "assets/barthy.png",
     meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "barthy",
     text: "Meepssss",
     next: "meeps_hi"
   },
 
   meeps_hi: {
-    keepCharacters: true,
+    //keepCharacters: true,
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps_wave.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "meeps",
     text: "Hi Barthy",
     next: "barthy_meeps_walking"
@@ -285,7 +316,8 @@ const states = {
   barthy_meeps_walking: {
     barthyImage: "assets/barthy_walking.png",
     meepsImage: "assets/meeps_walking.png",
-
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     animation: {
       type: "walkTogether",
       duration: 1200,
@@ -302,6 +334,8 @@ const states = {
   ask_valentine: {
     barthyImage: "assets/barthy_bouquet.png",
     meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "barthy",
     text: "Will you be my valentines?",
     choices: true
@@ -309,7 +343,9 @@ const states = {
 
   no_cry: {
     barthyImage: "assets/barthy_sad.png",
-    meepsImage: "assets/meeps.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "barthy",
     text: "Barthy sad… Barthy lonely…",
     next: "walk_away"
@@ -317,8 +353,9 @@ const states = {
 
   walk_away: {
     barthyImage: "assets/barthy_walking_sad.png",
-    meepsImage: "assets/meeps.png",
-
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     modal: {
       text: "Is Meeps really letting Barthy walk away heartbroken?",
       yes: "barthy_falling",
@@ -326,10 +363,43 @@ const states = {
     }
   },
 
+  meeps_calls_back: {
+    barthyImage: "assets/barthy_walking_sad.png",
+    meepsImage: "assets/meeps_wave.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "meeps",
+    text: "Wait Barthy, come back!",
+    next: "barthy_returns"
+  },
+
+  barthy_returns: {
+    barthyImage: "assets/barthy_walking_happy.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "meeps",
+    text: "Ask me again.. Hehhe",
+    next: "ask_valentine"
+  },
+
   barthy_falling: {
     barthyImage: "assets/barthy_falling.png",
-    meepsImage: "assets/meeps_walking.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    animation: {
+      type: "fall",
+      duration: 800,
+      next: "barthy_fell"
+    }
+  },
 
+  barthy_fell: {
+    barthyImage: "assets/barthy_fall.png",
+    meepsImage: "assets/meeps_shocked.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     animation: {
       type: "fall",
       duration: 800,
@@ -338,24 +408,40 @@ const states = {
   },
 
   barthy_faint: {
-    barthyImage: "assets/barthy_faint.png",
+    barthyImage: "assets/barthy_fainted.png",
     meepsImage: "assets/meeps_shocked.png",
-
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     modal: {
       text: "Is Meeps gonna help Barthy????",
-      yes: "kiss_repeat",
+      yes: "meeps_approach_barthy",
       no: "end_sad"
     }
   },
 
+  meeps_approach_barthy: {
+    barthyImage: "assets/barthy_fainted.png",
+    meepsImage: "assets/meeps_walking.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    next: "kiss_repeat"
+  },
+
   kiss_repeat: {
-    sceneImage: "assets/kiss.png",
+    sceneImage: "assets/meeps_kissing_barthy.png",
+    next: "embrace"
+  },
+
+  embrace: {
+    sceneImage: "assets/embrace.png",
     next: "ask_valentine_again"
   },
 
   ask_valentine_again: {
-    barthyImage: "assets/barthy_neutral.png",
-    meepsImage: "assets/meeps_tease.png",
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "meeps",
     text: "Ask me again.. hehe",
     next: "ask_valentine"
@@ -364,14 +450,18 @@ const states = {
   yes_happy: {
     barthyImage: "assets/barthy_excited.png",
     meepsImage: "assets/meeps_happy.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "barthy",
-    text: "Yaay! I'm so excited to be your valentines",
+    text: "Yaay! I'm so excited to be spending valentines with you",
     next: "end_happy"
   },
 
   end_happy: {
     barthyImage: "assets/barthy_happy.png",
     meepsImage: "assets/meeps_happy.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "meeps",
     text: "Pottery. Candles. Dinner. Valentines together"
   },
@@ -379,6 +469,8 @@ const states = {
   end_sad: {
     barthyImage: "assets/barthy_sad.png",
     meepsImage: "assets/meeps_sad.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     speaker: "barthy",
     text: "Oh well… maybe next year"
   }
