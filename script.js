@@ -8,13 +8,13 @@ const modalText = document.getElementById("modalText");
 const modalYes = document.getElementById("modalYes");
 const modalNo = document.getElementById("modalNo");
 
-let currentState = "intro";
+let currentState = null;
 
 /* -------- STATES -------- */
 
 const states = {
   intro: {
-    image: "photo.jpeg",
+    image: "assets/barthy.png",
     text: "Barthy: Meepssss",
     next: "meeps_hi"
   },
@@ -44,14 +44,14 @@ const states = {
   },
 
   walk_away: {
-    image: "barthy_walk.jpeg",
-    text: "*Barthy starts walking away*",
-    modal: {
-      text: "Is Meeps really letting Barthy walk away heartbroken?",
-      yes: "barthy_faint",
-      no: "end_sad"
-    }
-  },
+  image: "barthy_walk.jpeg",
+  text: "*Barthy starts walking away*",
+  modal: {
+    text: "Is Meeps really letting Barthy walk away heartbroken?",
+    yes: "barthy_faint",
+    no: "meeps_calls_back"
+  }
+},
 
   barthy_faint: {
     image: "barthy_faint.jpeg",
@@ -75,26 +75,36 @@ const states = {
     next: "ask_valentine"
   },
 
+  meeps_calls_back: {
+    image: "meeps_calling.jpeg",
+    text: 'Meeps: "Wait Barthy, come back!"',
+    next: "barthy_returns"
+    },
+
+  barthy_returns: {
+    image: "barthy_smile.jpeg",
+    text: 'Meeps: "Ask me again.. Hehhe"',
+    next: "ask_valentine"
+  },
+
   yes_happy: {
     image: "barthy_happy.jpeg",
-    text: "Barthy: Yaay! I'm so excited to be your valentines 💖",
+    text: "Barthy: Yaay! I'm so excited to be your valentines",
     next: "end_happy"
   },
 
   end_happy: {
     image: "photo.jpeg",
-    text: "Pottery. Candles. Dinner. Valentines together 💕",
-    choices: false
+    text: "Pottery. Candles. Dinner. Valentines together"
   },
 
   end_sad: {
     image: "photo.jpeg",
-    text: "Oh well… maybe next year 💔",
-    choices: false
+    text: "Oh well… maybe next year"
   }
 };
 
-/* -------- FUNCTIONS -------- */
+/* -------- CORE LOGIC -------- */
 
 function goToState(stateKey) {
   const state = states[stateKey];
@@ -103,31 +113,59 @@ function goToState(stateKey) {
   sceneImage.src = state.image;
   text.textContent = state.text || "";
 
-  yesBtn.style.display = state.choices ? "inline-block" : "none";
-  noBtn.style.display = state.choices ? "inline-block" : "none";
+  // Hide everything by default
+  hideChoices();
+  hideModal();
 
-  if (state.next && !state.choices && !state.modal) {
+  // Show choice buttons only when needed
+  if (state.choices) {
+    showChoices();
+    return;
+  }
+
+  // Show modal if state has one
+  if (state.modal) {
+    setTimeout(() => showModal(state.modal), 1000);
+    return;
+  }
+
+  // Auto-advance if next exists
+  if (state.next) {
     setTimeout(() => goToState(state.next), 1500);
   }
-
-  if (state.modal) {
-    setTimeout(() => showModal(state.modal), 1200);
-  }
 }
+
+/* -------- MODAL -------- */
 
 function showModal({ text, yes, no }) {
   modalText.textContent = text;
   modal.classList.remove("hidden");
 
   modalYes.onclick = () => {
-    modal.classList.add("hidden");
+    hideModal();
     goToState(yes);
   };
 
   modalNo.onclick = () => {
-    modal.classList.add("hidden");
+    hideModal();
     goToState(no);
   };
+}
+
+function hideModal() {
+  modal.classList.add("hidden");
+}
+
+/* -------- CHOICES -------- */
+
+function showChoices() {
+  yesBtn.style.display = "inline-block";
+  noBtn.style.display = "inline-block";
+}
+
+function hideChoices() {
+  yesBtn.style.display = "none";
+  noBtn.style.display = "none";
 }
 
 /* -------- EVENTS -------- */

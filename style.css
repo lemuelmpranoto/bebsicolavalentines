@@ -5,7 +5,8 @@
 
 body {
   margin: 0;
-  background: linear-gradient(135deg, #ffd6e7, #fff0f6);
+  background: linear-gradient(135deg, #9ec57c, #fff0f6);
+  /* background: linear-gradient(135deg, #ffd6e7, #fff0f6); */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -77,17 +78,21 @@ button {
   100% { transform: translateX(0); }
 }
 
-/* Modal */
+/* MODAL FIX */
+
 #modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
+
   display: flex;
   justify-content: center;
   align-items: center;
+
+  z-index: 999;
 }
 
-.hidden {
+#modal.hidden {
   display: none;
 }
 
@@ -97,11 +102,12 @@ button {
   border-radius: 16px;
   text-align: center;
   width: 80%;
-  max-width: 300px;
+  max-width: 320px;
+
+  z-index: 1000;
+  pointer-events: auto;
 }
 
-.modal-buttons {
-  margin-top: 16px;
-  display: flex;
-  justify-content: space-around;
+#modal * {
+  pointer-events: auto;
 }
