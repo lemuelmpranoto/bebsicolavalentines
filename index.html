@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bebsicola Valentines 💖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+    <div id="scene">
+      <img id="sceneImage" src="photo.jpeg" alt="scene" />
+    </div>
+
+    <div id="dialogue">
+      <p id="text"></p>
+    </div>
+
+    <div id="choices">
+      <button id="yesBtn">Yes 💕</button>
+      <button id="noBtn">No 😢</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden">
+    <div class="modal-content">
+      <p id="modalText"></p>
+      <div class="modal-buttons">
+        <button id="modalYes">Yes</button>
+        <button id="modalNo">No</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

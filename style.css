@@ -1,0 +1,107 @@
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #ffd6e7, #fff0f6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#app {
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+
+#scene {
+  margin-bottom: 16px;
+}
+
+#scene img {
+  width: 100%;
+  border-radius: 16px;
+  transition: all 0.4s ease;
+}
+
+#dialogue {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  min-height: 60px;
+  margin-bottom: 12px;
+}
+
+#choices {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#yesBtn {
+  background: #ff4d88;
+  color: white;
+}
+
+#yesBtn:hover {
+  transform: scale(1.1);
+}
+
+#noBtn {
+  background: #ccc;
+}
+
+/* Animations */
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* Modal */
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  width: 80%;
+  max-width: 300px;
+}
+
+.modal-buttons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-around;
+}
