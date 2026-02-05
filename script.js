@@ -1,3 +1,6 @@
+const barthyContainer = document.getElementById("barthyContainer");
+const meepsContainer = document.getElementById("meepsContainer");
+
 const barthyImage = document.getElementById("barthyImage");
 const meepsImage = document.getElementById("meepsImage");
 const sceneImage = document.getElementById("sceneImage");
@@ -42,8 +45,8 @@ const characterMemory = {
 
 function applyCharacterPositions() {
 
-  barthyImage.style.left = characterMemory.barthy.x + "px";
-  meepsImage.style.right = characterMemory.meeps.x + "px";
+  barthyContainer.style.left = characterMemory.barthy.x + "px";
+  meepsContainer.style.right = characterMemory.meeps.x + "px";
 
 }
 
@@ -64,18 +67,38 @@ function setCharacterScale(img, scaleClass, characterKey) {
 
 }
 
-function applyPositionOffset(state) {
+function modifyPositionOffset(state) {
+
+  let changed = false;
 
   if (state.barthyOffsetX !== undefined) {
     characterMemory.barthy.x += state.barthyOffsetX;
+    changed = true;
   }
 
   if (state.meepsOffsetX !== undefined) {
     characterMemory.meeps.x += state.meepsOffsetX;
+    changed = true;
   }
 
-  applyCharacterPositions();
+  if (changed) {
 
+    // Disable transition temporarily
+    const oldBarthyTransition = barthyContainer.style.transition;
+    const oldMeepsTransition = meepsContainer.style.transition;
+
+    barthyContainer.style.transition = "none";
+    meepsContainer.style.transition = "none";
+
+    applyCharacterPositions();
+
+    // Force reflow
+    barthyContainer.offsetHeight;
+
+    // Restore transition
+    barthyContainer.style.transition = oldBarthyTransition;
+    meepsContainer.style.transition = oldMeepsTransition;
+  }
 }
 
 function applySceneOffset(state) {
@@ -87,7 +110,10 @@ function applySceneOffset(state) {
   applyScenePosition();
 }
 
-
+function applyPositionMemory() {
+  barthyContainer.style.left = characterMemory.barthy.x + "px";
+  meepsContainer.style.right = characterMemory.meeps.x + "px";
+}
 
 /* =====================================================
    IMAGE HELPERS
@@ -198,53 +224,105 @@ function showModalPrompt({ text, yes, no }) {
    ANIMATION SYSTEM
 ===================================================== */
 
-function playAnimation(animation) {
+function moveCharacter(character, direction, distance, duration, next) {
+
+  const container =
+    character === "barthy" ? barthyContainer : meepsContainer;
+
+  const memory =
+    character === "barthy" ? characterMemory.barthy : characterMemory.meeps;
+
+  const property =
+    character === "barthy" ? "left" : "right";
+
+  const multiplier =
+    direction === "left" ? -1 : 1;
+
+  const start = memory.x;
+  const end = start + (distance * multiplier);
+
+  // Animate
+  container.style.transition = `${property} ${duration}ms ease`;
+  container.style[property] = end + "px";
+
+  animationTimeout = setTimeout(() => {
+
+    // Commit memory
+    memory.x = end;
+
+    // Remove transition so future offsets don't slide
+    container.style.transition = "";
+
+    if (next) goToState(next);
+
+  }, duration);
+}
+
+
+function playAnimation(animation, stateNext) {
 
   if (!animation) return;
 
-  const { type, duration, next } = animation;
+  const animations = Array.isArray(animation)
+    ? animation
+    : [animation];
 
-  if (type === "walkTogether") {
+  let finishedCount = 0;
 
-    barthyImage.classList.add("walking-left");
-    meepsImage.classList.add("walking-right");
+  animations.forEach(anim => {
 
-    animationTimeout = setTimeout(() => {
+    const {
+      character,
+      direction,
+      distance,
+      duration
+    } = anim;
 
-      barthyImage.classList.remove("walking-left");
-      meepsImage.classList.remove("walking-right");
+    const container =
+      character === "barthy"
+        ? barthyContainer
+        : meepsContainer;
 
-      /* SAVE NEW POSITIONS */
-      characterMemory.barthy.x += 250;
-      characterMemory.meeps.x += 250;
+    const memory =
+      character === "barthy"
+        ? characterMemory.barthy
+        : characterMemory.meeps;
 
-      applyCharacterPositions();
+    const property =
+      character === "barthy"
+        ? "left"
+        : "right";
 
-      if (next) goToState(next);
+    const multiplier =
+      direction === "left" ? -1 : 1;
+
+    const end = memory.x + (distance * multiplier);
+
+    // Animate
+    container.style.transition = `${property} ${duration}ms ease`;
+    container.style[property] = end + "px";
+
+    setTimeout(() => {
+
+      // Commit memory
+      memory.x = end;
+
+      // Remove transition so future offsets don't slide
+      container.style.transition = "";
+
+      finishedCount++;
+
+      // Only go next after ALL animations finish
+      if (finishedCount === animations.length && stateNext) {
+        goToState(stateNext);
+      }
 
     }, duration);
 
-    return;
-
-  }
-
-  if (type === "fall") {
-
-    barthyImage.classList.add("fall");
-
-    animationTimeout = setTimeout(() => {
-
-      barthyImage.classList.remove("fall");
-
-      if (next) goToState(next);
-
-    }, duration);
-
-    return;
-
-  }
+  });
 
 }
+
 
 
 /* =====================================================
@@ -272,6 +350,8 @@ function goToState(stateKey) {
     showScene(state.sceneImage);
 
     applySceneOffset(state);
+    modifyPositionOffset(state);
+    applyPositionMemory();
   }
 
   /* ---------- CHARACTER MODE ---------- */
@@ -308,7 +388,8 @@ function goToState(stateKey) {
 
     } else hideMeeps();
     /* Apply remembered positions */
-    applyPositionOffset(state);
+    modifyPositionOffset(state);
+    applyPositionMemory();
 
   }
 
@@ -341,7 +422,7 @@ function goToState(stateKey) {
   /* ---------- ANIMATION ---------- */
 
   if (state.animation) {
-    playAnimation(state.animation);
+    playAnimation(state.animation, state.next);
     return;
   }
 
@@ -391,17 +472,29 @@ const states = {
     meepsImage: "assets/meeps_walking.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    animation: {
-      type: "walkTogether",
-      duration: 1200,
-      next: "hug"
-    }
+    animation: [
+      {
+        character: "barthy",
+        direction: "right",
+        distance: 260,
+        duration: 1200
+      },
+      {
+        character: "meeps",
+        direction: "right",
+        distance: 260,
+        duration: 1200,
+      }
+    ],
+    next: "hug"
   },
 
   hug: {
     sceneImage: "assets/hug.png",
     delay: 1000,
-    sceneOffsetX: 40,
+    sceneOffsetX: 60,
+    barthyOffsetX: -40,
+    meepsOffsetX: -40,
     next: "ask_valentine"
   },
 
@@ -410,8 +503,7 @@ const states = {
     meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    barthyOffsetX: -40,
-    meepsOffsetX: -40,
+
     speaker: "barthy",
     text: "Will you be my valentines?",
     choices: true
@@ -432,6 +524,21 @@ const states = {
     meepsImage: "assets/meeps_grin.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
+    animation: {
+      character: "barthy",
+      direction: "left",
+      distance: 200,
+      duration: 1000,
+      
+    },
+    next: "walk_away_modal"
+  },
+
+  walk_away_modal: {
+    barthyImage: "assets/barthy_walking_sad.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
     modal: {
       text: "Is Meeps really letting Barthy walk away heartbroken?",
       yes: "barthy_falling",
@@ -440,12 +547,24 @@ const states = {
   },
 
   meeps_calls_back: {
-    barthyImage: "assets/barthy_walking_sad.png",
+    barthyImage: "assets/barthy.png",
     meepsImage: "assets/meeps_wave.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "meeps",
     text: "Wait Barthy, come back!",
+    next: "meeps_calls_back_walk"
+  },
+
+  meeps_calls_back_walk: {
+    barthyImage: "assets/barthy_walking_happy.png",
+    meepsImage: "assets/meeps_wave.png",
+    animation: {
+      character: "barthy",
+      direction: "right",
+      distance: 200,
+      duration: 1000,
+    },
     next: "barthy_returns"
   },
 
@@ -464,11 +583,13 @@ const states = {
     meepsImage: "assets/meeps_grin.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    animation: {
-      type: "fall",
-      duration: 800,
-      next: "barthy_fell"
-    }
+    barthyOffsetX: -80,
+    // animation: {
+    //   type: "fall",
+    //   duration: 1000,
+    //   next: "barthy_fell"
+    // }
+    next: "barthy_fell"
   },
 
   barthy_fell: {
@@ -476,11 +597,12 @@ const states = {
     meepsImage: "assets/meeps_shocked.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    animation: {
-      type: "fall",
-      duration: 800,
-      next: "barthy_faint"
-    }
+    // animation: {
+    //   type: "fall",
+    //   duration: 1000,
+    //   next: "barthy_faint"
+    // }
+    next: "barthy_faint"
   },
 
   barthy_faint: {
@@ -500,16 +622,24 @@ const states = {
     meepsImage: "assets/meeps_walking.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
+    animation: {
+      character: "meeps",
+      direction: "right",
+      distance: 250,
+      duration: 1200,
+    },
     next: "kiss_repeat"
   },
 
   kiss_repeat: {
     sceneImage: "assets/meeps_kissing_barthy.png",
+    sceneOffsetX: -150,
     next: "embrace"
   },
 
   embrace: {
     sceneImage: "assets/embrace.png",
+    sceneOffsetX: 0,
     next: "ask_valentine_again"
   },
 
@@ -518,6 +648,8 @@ const states = {
     meepsImage: "assets/meeps_grin.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
+    barthyOffsetX: 270,
+    meepsOffsetX: -250,
     speaker: "meeps",
     text: "Ask me again.. hehe",
     next: "ask_valentine"

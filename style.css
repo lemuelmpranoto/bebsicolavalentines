@@ -26,18 +26,19 @@ body {
 
 /* Characters */
 
-.character {
+.character-container {
   position: absolute;
   bottom: 0;
+  transition: left 0.4s ease, right 0.4s ease;
+}
+
+.character {
   height: 260px;
   width: auto;
   object-fit: contain;
   transition:
-    left 0.4s ease,
-    right 0.4s ease,
     transform 0.4s ease,
     opacity 0.15s ease;
-
 }
 
 .character.left {
@@ -48,12 +49,20 @@ body {
   right: 0;
 }
 
-.character.scale-small {
+.scale-small {
   transform: scale(0.9);
 }
 
-.character.scale-large {
+.scale-large {
   transform: scale(1.0);
+}
+
+#barthyContainer {
+  left: -200px;
+}
+
+#meepsContainer {
+  right: -200px;
 }
 
 /* Scene image */
@@ -149,7 +158,7 @@ button {
   100% { transform: translateX(0); }
 }
 
-.walking-left {
+/* .walking-left {
   animation: walkRight 1.2s ease forwards;
 }
 
@@ -158,12 +167,28 @@ button {
 }
 
 @keyframes walkRight {
-  to { transform: translateX(250px); }
+  to { transform: translateX(260px); }
 }
 
 @keyframes walkLeft {
-  to { transform: translateX(-250px); }
+  to { transform: translateX(-260px); }
 }
+
+.walking-away-left {
+  animation: walkAwayLeft 1s ease forwards;
+}
+
+.walking-back-right {
+  animation: walkBackRight 1s ease forwards;
+}
+
+@keyframes walkAwayLeft {
+  to { transform: translateX(-200px); }
+}
+
+@keyframes walkBackRight {
+  to { transform: translateX(200px); }
+} */
 
 /* Modal */
 
