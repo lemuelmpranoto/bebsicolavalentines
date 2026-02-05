@@ -20,6 +20,76 @@ let animationTimeout = null;
 
 
 /* =====================================================
+   POSITION MEMORY SYSTEM
+===================================================== */
+
+const characterMemory = {
+
+  barthy: {
+    x: -200,
+    scale: "scale-large"
+  },
+
+  meeps: {
+    x: -200,
+    scale: "scale-small"
+  },
+
+  scene: { x: 0 }
+
+};
+
+
+function applyCharacterPositions() {
+
+  barthyImage.style.left = characterMemory.barthy.x + "px";
+  meepsImage.style.right = characterMemory.meeps.x + "px";
+
+}
+
+function applyScenePosition() {
+  sceneImage.style.left = characterMemory.scene.x + "px";
+  sceneImage.style.transform = "translateX(0)";
+}
+
+
+function setCharacterScale(img, scaleClass, characterKey) {
+
+  img.classList.remove("scale-small", "scale-large");
+
+  if (scaleClass) {
+    img.classList.add(scaleClass);
+    characterMemory[characterKey].scale = scaleClass;
+  }
+
+}
+
+function applyPositionOffset(state) {
+
+  if (state.barthyOffsetX !== undefined) {
+    characterMemory.barthy.x += state.barthyOffsetX;
+  }
+
+  if (state.meepsOffsetX !== undefined) {
+    characterMemory.meeps.x += state.meepsOffsetX;
+  }
+
+  applyCharacterPositions();
+
+}
+
+function applySceneOffset(state) {
+
+  if (state.sceneOffsetX !== undefined) {
+    characterMemory.scene.x += state.sceneOffsetX;
+  }
+
+  applyScenePosition();
+}
+
+
+
+/* =====================================================
    IMAGE HELPERS
 ===================================================== */
 
@@ -60,11 +130,9 @@ function setImageSafely(imgEl, src, showFn) {
   imgEl.onload = null;
   imgEl.src = src;
 
-  if (imgEl.complete) {
-    showFn();
-  } else {
-    imgEl.onload = showFn;
-  }
+  if (imgEl.complete) showFn();
+  else imgEl.onload = showFn;
+
 }
 
 
@@ -90,6 +158,7 @@ function showDialogue(speaker, text) {
     meepsText.textContent = text;
     meepsBox.classList.remove("hidden");
   }
+
 }
 
 function showChoices() {
@@ -121,6 +190,7 @@ function showModalPrompt({ text, yes, no }) {
     modal.classList.add("hidden");
     goToState(no);
   };
+
 }
 
 
@@ -139,22 +209,41 @@ function playAnimation(animation) {
     barthyImage.classList.add("walking-left");
     meepsImage.classList.add("walking-right");
 
+    animationTimeout = setTimeout(() => {
+
+      barthyImage.classList.remove("walking-left");
+      meepsImage.classList.remove("walking-right");
+
+      /* SAVE NEW POSITIONS */
+      characterMemory.barthy.x += 250;
+      characterMemory.meeps.x += 250;
+
+      applyCharacterPositions();
+
+      if (next) goToState(next);
+
+    }, duration);
+
+    return;
+
   }
 
   if (type === "fall") {
 
     barthyImage.classList.add("fall");
 
+    animationTimeout = setTimeout(() => {
+
+      barthyImage.classList.remove("fall");
+
+      if (next) goToState(next);
+
+    }, duration);
+
+    return;
+
   }
 
-  animationTimeout = setTimeout(() => {
-
-    barthyImage.classList.remove("walking-left", "fall");
-    meepsImage.classList.remove("walking-right");
-
-    if (next) goToState(next);
-
-  }, duration);
 }
 
 
@@ -167,9 +256,7 @@ function goToState(stateKey) {
   const state = states[stateKey];
   currentState = stateKey;
 
-  if (animationTimeout) {
-    clearTimeout(animationTimeout);
-  }
+  if (animationTimeout) clearTimeout(animationTimeout);
 
   hideScene();
   hideDialogue();
@@ -184,6 +271,7 @@ function goToState(stateKey) {
 
     showScene(state.sceneImage);
 
+    applySceneOffset(state);
   }
 
   /* ---------- CHARACTER MODE ---------- */
@@ -192,53 +280,38 @@ function goToState(stateKey) {
 
     hideScene();
 
-    if (state.keepCharacters) {
+    /* Barthy */
 
-      showBarthy();
-      showMeeps();
+    if (state.barthyImage) {
 
-    } else {
+      setImageSafely(barthyImage, state.barthyImage, showBarthy);
 
-      if (state.barthyImage) {
+      setCharacterScale(
+        barthyImage,
+        state.barthyScale || characterMemory.barthy.scale,
+        "barthy"
+      );
 
-        barthyImage.classList.remove("scale-small", "scale-large");
+    } else hideBarthy();
 
-        setImageSafely(barthyImage, state.barthyImage, () => {
+    /* Meeps */
 
-          showBarthy();
+    if (state.meepsImage) {
 
-          if (state.barthyScale) {
-            barthyImage.classList.add(state.barthyScale);
-          }
+      setImageSafely(meepsImage, state.meepsImage, showMeeps);
 
-        });
+      setCharacterScale(
+        meepsImage,
+        state.meepsScale || characterMemory.meeps.scale,
+        "meeps"
+      );
 
-      }
-      else {
-        hideBarthy();
-      }
-
-      if (state.meepsImage) {
-
-        meepsImage.classList.remove("scale-small", "scale-large");
-
-        setImageSafely(meepsImage, state.meepsImage, () => {
-
-          showMeeps();
-
-          if (state.meepsScale) {
-            meepsImage.classList.add(state.meepsScale);
-          }
-
-        });
-
-      } else {
-        hideMeeps();
-      }
-
-    }
+    } else hideMeeps();
+    /* Apply remembered positions */
+    applyPositionOffset(state);
 
   }
+
 
   /* ---------- DIALOGUE ---------- */
 
@@ -291,7 +364,7 @@ function goToState(stateKey) {
 ===================================================== */
 
 const states = {
-
+  
   intro: {
     barthyImage: "assets/barthy.png",
     meepsImage: "assets/meeps.png",
@@ -328,6 +401,7 @@ const states = {
   hug: {
     sceneImage: "assets/hug.png",
     delay: 1000,
+    sceneOffsetX: 40,
     next: "ask_valentine"
   },
 
@@ -336,6 +410,8 @@ const states = {
     meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
+    barthyOffsetX: -40,
+    meepsOffsetX: -40,
     speaker: "barthy",
     text: "Will you be my valentines?",
     choices: true

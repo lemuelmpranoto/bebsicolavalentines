@@ -28,21 +28,24 @@ body {
 
 .character {
   position: absolute;
-  object-fit: contain;
+  bottom: 0;
   height: 260px;
   width: auto;
-  transition: transform 0.4s ease;
-  opacity: 1;
-  visibility: visible;
-  /* transition: opacity 0.15s ease, transform 0.4s ease; */
+  object-fit: contain;
+  transition:
+    left 0.4s ease,
+    right 0.4s ease,
+    transform 0.4s ease,
+    opacity 0.15s ease;
+
 }
 
 .character.left {
-  left: -200px;
+  left: 0;
 }
 
 .character.right {
-  right: -200px;
+  right: 0;
 }
 
 .character.scale-small {
@@ -58,8 +61,8 @@ body {
 .scene-image {
   position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  transform: translateX(0);
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
