@@ -15,6 +15,25 @@ const modalYes = document.getElementById("modalYes");
 const modalNo = document.getElementById("modalNo");
 
 let currentState = null;
+let barthyBaseImage = null;
+
+/* -------- VISIBILITY HELPERS -------- */
+
+function showBarthy() {
+  barthyImage.style.display = "block";
+}
+
+function hideBarthy() {
+  barthyImage.style.display = "none";
+}
+
+function showMeeps() {
+  meepsImage.style.display = "block";
+}
+
+function hideMeeps() {
+  meepsImage.style.display = "none";
+}
 
 /* -------- STATES -------- */
 
@@ -28,18 +47,21 @@ const states = {
   },
 
   meeps_hi: {
-    barthyImage: "assets/barthy.png",
-    meepsImage: "assets/meeps.png",
     speaker: "meeps",
     text: "Hi Barthy",
+    next: "barthy_meeps_walking"
+  },
+
+  barthy_meeps_walking: {
+    barthyImage: "assets/barthy_walking.png",
+    meepsImage: "assets/meeps_walking.png",
     next: "hug"
   },
 
   hug: {
-    barthyImage: "assets/barthy.png",
-    meepsImage: "assets/meeps.png",
+    barthyImage: null,
+    meepsImage: "assets/hug.png",
     speaker: "barthy",
-    text: "*Barthy and Meeps hug*",
     next: "ask_valentine"
   },
 
@@ -100,8 +122,8 @@ const states = {
   },
 
   kiss_repeat: {
-    barthyImage: "assets/barthy_happy.png",
-    meepsImage: "assets/meeps_happy.png",
+    barthyImage: null,
+    meepsImage: null,
     speaker: "meeps",
     text: "*Meeps kisses Barthy. They hug.*",
     next: "ask_valentine_again"
@@ -144,18 +166,58 @@ function goToState(stateKey) {
   const state = states[stateKey];
   currentState = stateKey;
 
-  if (state.barthyImage) {
+  showBothCharacters();
+
+  /* Barthy handling */
+  if (state.barthyImage === null) {
+    hideBarthy();
+  } else if (state.barthyImage) {
+    showBarthy();
     barthyImage.src = state.barthyImage;
+    barthyBaseImage = state.barthyImage;
   }
 
-  if (state.meepsImage) {
+
+  /* Meeps handling */
+  if (state.meepsImage === null) {
+    hideMeeps();
+  } else if (state.meepsImage) {
+    showMeeps();
     meepsImage.src = state.meepsImage;
+
+    // Center hug images (when Barthy is hidden)
+    if (state.barthyImage === null) {
+        meepsImage.classList.add("center");
+    } else {
+        meepsImage.classList.remove("center");
+    }
   }
+
+    // Walking cutscene
+  if (stateKey === "barthy_meeps_walking") {
+    hideDialogue();
+    hideChoices();
+    hideModal();
+
+    barthyImage.classList.add("walking-left");
+    meepsImage.classList.add("walking-right");
+
+    // After animation finishes → hug
+    setTimeout(() => {
+      barthyImage.classList.remove("walking-left");
+      meepsImage.classList.remove("walking-right");
+      goToState("hug");
+    }, 1200);
+
+    return; // prevent normal auto-next
+  }
+
 
   hideDialogue();
   hideChoices();
   hideModal();
 
+  if (state.speaker && state.text) {
   if (state.speaker === "barthy") {
     barthyText.textContent = state.text;
     barthyBox.classList.remove("hidden");
@@ -165,6 +227,7 @@ function goToState(stateKey) {
     meepsText.textContent = state.text;
     meepsBox.classList.remove("hidden");
   }
+}
 
   if (state.choices) {
     showChoices();
@@ -180,6 +243,12 @@ function goToState(stateKey) {
     setTimeout(() => goToState(state.next), 1500);
   }
 }
+
+function showBothCharacters() {
+  barthyImage.style.display = "block";
+  meepsImage.style.display = "block";
+}
+
 
 /* -------- MODAL -------- */
 
