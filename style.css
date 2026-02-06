@@ -3,19 +3,57 @@
   font-family: "Poppins", sans-serif;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 body {
   margin: 0;
-  background: linear-gradient(135deg, #9ec57c, #fff0f6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
 }
 
+#game {
+  position: relative;
+
+  width: 100vw;
+  height: 100vh;
+
+  overflow: hidden;
+}
+
+#background {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-image: url("assets/background.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  z-index: -1;
+}
+
+
 #app {
+  position: absolute;
+
+  left: 50%;
+  bottom: 30%;
+
+  transform: translateX(-50%);
+
   width: 90%;
   max-width: 500px;
-  text-align: center;
+
+  z-index: 10;
 }
 
 #scene {
@@ -58,6 +96,10 @@ body {
   transform: scale(1.0);
 }
 
+.scale-extra-large {
+  transform: scale(1.5);
+}
+
 #barthyContainer {
   left: -200px;
 }
@@ -80,6 +122,19 @@ body {
   opacity: 1;
   visibility: visible;
   transition: opacity 0.15s ease;
+}
+
+.fullscreen-overlay {
+  position: fixed !important;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100vw !important;
+
+  object-fit: cover;
+
+  z-index: 9999;
 }
 
 .hidden {
@@ -184,4 +239,46 @@ button {
   text-align: center;
   width: 80%;
   max-width: 320px;
+}
+
+#endScreen {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0,0,0,0.75);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10000;
+}
+
+#endScreen.hidden {
+  display: none;
+}
+
+#endTitle {
+  font-size: 48px;
+  color: white;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px red;
+}
+
+#restartBtn {
+  padding: 12px 24px;
+  font-size: 18px;
+  border-radius: 999px;
+  border: none;
+  background: #ff4d88;
+  color: white;
+  cursor: pointer;
+}
+
+#restartBtn:hover {
+  transform: scale(1.1);
 }

@@ -1,8 +1,10 @@
 const barthyContainer = document.getElementById("barthyContainer");
 const meepsContainer = document.getElementById("meepsContainer");
+const dragonContainer = document.getElementById("dragonContainer");
 
 const barthyImage = document.getElementById("barthyImage");
 const meepsImage = document.getElementById("meepsImage");
+const dragonImage = document.getElementById("dragonImage");
 const sceneImage = document.getElementById("sceneImage");
 
 const barthyBox = document.getElementById("barthyBox");
@@ -17,6 +19,9 @@ const modal = document.getElementById("modal");
 const modalText = document.getElementById("modalText");
 const modalYes = document.getElementById("modalYes");
 const modalNo = document.getElementById("modalNo");
+const endScreen = document.getElementById("endScreen");
+const restartBtn = document.getElementById("restartBtn");
+
 
 let currentState = null;
 let animationTimeout = null;
@@ -38,16 +43,27 @@ const characterMemory = {
     scale: "scale-small"
   },
 
+  dragon: {
+    x: 700,
+    y: 500,
+    scaleValue: 0.6,
+    scale: "scale-extra-large"
+  },
+
   scene: { x: 0 }
 
 };
 
 
 function applyCharacterPositions() {
-
   barthyContainer.style.left = characterMemory.barthy.x + "px";
   meepsContainer.style.right = characterMemory.meeps.x + "px";
 
+  dragonContainer.style.left = characterMemory.dragon.x + "px";
+  dragonContainer.style.bottom = characterMemory.dragon.y + "px";
+
+  dragonContainer.style.transform =
+    `scale(${characterMemory.dragon.scaleValue})`;
 }
 
 function applyScenePosition() {
@@ -113,6 +129,7 @@ function applySceneOffset(state) {
 function applyPositionMemory() {
   barthyContainer.style.left = characterMemory.barthy.x + "px";
   meepsContainer.style.right = characterMemory.meeps.x + "px";
+  dragonContainer.style.left = characterMemory.dragon.x + "px";
 }
 
 /* =====================================================
@@ -139,8 +156,26 @@ function hideMeeps() {
   meepsImage.style.opacity = "0";
 }
 
-function showScene(src) {
+function showDragon() {
+  dragonImage.style.visibility = "visible";
+  dragonImage.style.opacity = "1";
+}
+
+function hideDragon() {
+  dragonImage.style.visibility = "hidden";
+  dragonImage.style.opacity = "0";
+}
+
+
+function showScene(src, fullscreen = false) {
+
   sceneImage.src = src;
+
+  if (fullscreen)
+    sceneImage.classList.add("fullscreen-overlay");
+  else
+    sceneImage.classList.remove("fullscreen-overlay");
+
   sceneImage.classList.remove("hidden");
 }
 
@@ -197,6 +232,35 @@ function hideChoices() {
   noBtn.style.visibility = "hidden";
 }
 
+function showEndScreen() {
+  endScreen.classList.remove("hidden");
+}
+
+function hideEndScreen() {
+  endScreen.classList.add("hidden");
+}
+
+function resetGame() {
+
+  characterMemory.barthy.x = -200;
+  characterMemory.meeps.x = -200;
+
+  characterMemory.dragon.x = 700;
+  characterMemory.dragon.y = 500;
+  characterMemory.dragon.scaleValue = 0.6;
+
+  characterMemory.scene.x = 0;
+
+  hideDragon();
+  hideScene();
+  hideDialogue();
+  hideChoices();
+  hideEndScreen();
+
+  applyCharacterPositions();
+
+  goToState("intro");
+}
 
 /* =====================================================
    MODAL SYSTEM
@@ -224,41 +288,6 @@ function showModalPrompt({ text, yes, no }) {
    ANIMATION SYSTEM
 ===================================================== */
 
-function moveCharacter(character, direction, distance, duration, next) {
-
-  const container =
-    character === "barthy" ? barthyContainer : meepsContainer;
-
-  const memory =
-    character === "barthy" ? characterMemory.barthy : characterMemory.meeps;
-
-  const property =
-    character === "barthy" ? "left" : "right";
-
-  const multiplier =
-    direction === "left" ? -1 : 1;
-
-  const start = memory.x;
-  const end = start + (distance * multiplier);
-
-  // Animate
-  container.style.transition = `${property} ${duration}ms ease`;
-  container.style[property] = end + "px";
-
-  animationTimeout = setTimeout(() => {
-
-    // Commit memory
-    memory.x = end;
-
-    // Remove transition so future offsets don't slide
-    container.style.transition = "";
-
-    if (next) goToState(next);
-
-  }, duration);
-}
-
-
 function playAnimation(animation, stateNext) {
 
   if (!animation) return;
@@ -271,53 +300,84 @@ function playAnimation(animation, stateNext) {
 
   animations.forEach(anim => {
 
-    const {
-      character,
-      direction,
-      distance,
-      duration
-    } = anim;
+    const { character, direction, distance, duration, deltaY } = anim;
 
     const container =
       character === "barthy"
         ? barthyContainer
-        : meepsContainer;
+        : character === "meeps"
+        ? meepsContainer
+        : dragonContainer;
 
-    const memory =
-      character === "barthy"
-        ? characterMemory.barthy
-        : characterMemory.meeps;
+    const memory = characterMemory[character];
 
     const property =
       character === "barthy"
         ? "left"
-        : "right";
+        : character === "meeps"
+        ? "right"
+        : "left";
 
-    const multiplier =
-      direction === "left" ? -1 : 1;
+    const multiplier = direction === "left" ? -1 : 1;
 
-    const end = memory.x + (distance * multiplier);
+    const endX = memory.x + (distance * multiplier);
 
-    // Animate
-    container.style.transition = `${property} ${duration}ms ease`;
-    container.style[property] = end + "px";
+    // ONLY dragon uses Y animation
+    if (character === "dragon") {
 
-    setTimeout(() => {
+      const endY = memory.y + (deltaY || 0);
 
-      // Commit memory
-      memory.x = end;
+      const startScale = memory.scaleValue ?? 0.6;
+      const endScale = anim.scaleTo ?? startScale;
 
-      // Remove transition so future offsets don't slide
-      container.style.transition = "";
+      container.style.transition = `
+        ${property} ${duration}ms ease,
+        bottom ${duration}ms ease,
+        transform ${duration}ms ease
+      `;
 
-      finishedCount++;
+      container.style[property] = endX + "px";
+      container.style.bottom = endY + "px";
+      container.style.transform = `scale(${endScale})`;
 
-      // Only go next after ALL animations finish
-      if (finishedCount === animations.length && stateNext) {
-        goToState(stateNext);
-      }
+      setTimeout(() => {
 
-    }, duration);
+        memory.x = endX;
+        memory.y = endY;
+        memory.scaleValue = endScale;
+
+        container.style.transition = "";
+
+        finishedCount++;
+
+        if (finishedCount === animations.length && stateNext) {
+          goToState(stateNext);
+        }
+
+      }, duration);
+
+    }
+
+    // Barthy and Meeps use original animation
+    else {
+
+      container.style.transition = `${property} ${duration}ms ease`;
+      container.style[property] = endX + "px";
+
+      setTimeout(() => {
+
+        memory.x = endX;
+        container.style.transition = "";
+
+        finishedCount++;
+
+        if (finishedCount === animations.length && stateNext) {
+          goToState(stateNext);
+        }
+
+      }, duration);
+
+    }
 
   });
 
@@ -387,6 +447,7 @@ function goToState(stateKey) {
   hideScene();
   hideDialogue();
   hideChoices();
+  hideEndScreen();
 
   /* ---------- SCENE MODE ---------- */
 
@@ -395,7 +456,7 @@ function goToState(stateKey) {
     hideBarthy();
     hideMeeps();
 
-    showScene(state.sceneImage);
+    showScene(state.sceneImage, state.fullscreen === true);
 
     applySceneOffset(state);
     modifyPositionOffset(state);
@@ -435,6 +496,17 @@ function goToState(stateKey) {
       );
 
     } else hideMeeps();
+
+    /* Dragon */
+
+    if (state.dragonImage) {
+
+      setImageSafely(dragonImage, state.dragonImage, showDragon);
+
+      applyCharacterPositions();
+
+    } else hideDragon();
+
     /* Apply remembered positions */
     modifyPositionOffset(state);
     applyPositionMemory();
@@ -442,6 +514,10 @@ function goToState(stateKey) {
   }
 
   /* ---------- DIALOGUE ---------- */
+  if (state.effect === "endScreen") {
+    showEndScreen();
+    return;
+  }
 
   showDialogue(state.speaker, state.text);
 
@@ -726,9 +802,29 @@ const states = {
   end_3: {
     sceneImage: "assets/kiss.png",
     sceneOffsetX: 0,
-    // next: "end_4"
+    next: "end_screen_happy"
   },
 
+  dragon_enters: {
+    dragonImage: "assets/dragon_fire.png",
+    animation: {
+      character: "dragon",
+      direction: "left",
+      distance: 1400,
+      deltaY: -1500,
+      scaleTo: 2.0,
+      duration: 6000
+    },
+    next: "dragon_fire_overlay"
+  },
+
+  dragon_fire_overlay: {
+    sceneImage: "assets/elmo.gif",
+    sceneOffsetX: 0,
+    fullscreen: true,
+    delay: 4000,
+    next: "end_screen_sad"
+  },
 
   end_sad: {
     barthyImage: "assets/barthy_sad.png",
@@ -736,8 +832,18 @@ const states = {
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "barthy",
-    text: "Oh well… maybe next year"
-  }
+    text: "Oh well… maybe next year",
+    next: "dragon_enters",
+    delay: 2000
+  },
+
+  end_screen_happy: {
+    effect: "endScreen"
+  },
+
+  end_screen_sad: {
+    effect: "endScreen"
+  },
 };
 
 
@@ -768,7 +874,7 @@ noBtn.addEventListener("mouseenter", () => {
 
 yesBtn.onclick = () => goToState("yes_happy");
 noBtn.onclick = () => goToState("no_cry");
-
+restartBtn.onclick = resetGame;
 
 /* =====================================================
    START GAME

@@ -7,42 +7,55 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="background"></div>
+  <div id="game">
+     <div id="app">
+      <div id="scene">
+        <div id="dragonContainer" class="character-container">
+          <img id="dragonImage" class="character" />
+        </div>
 
-  <div id="app">
-    <div id="scene">
-      <div id="barthyContainer" class="character-container left">
-        <img id="barthyImage" class="character" />
+        <div id="barthyContainer" class="character-container left">
+          <img id="barthyImage" class="character" />
+        </div>
+
+        <div id="meepsContainer" class="character-container right">
+          <img id="meepsImage" class="character" />
+        </div>
+
+        <img id="sceneImage" class="scene-image hidden" alt="Scene" />
       </div>
 
-      <div id="meepsContainer" class="character-container right">
-        <img id="meepsImage" class="character" />
+      <div id="dialogue">
+        <div id="barthyBox" class="dialogue-box left hidden">
+          <p id="barthyText"></p>
+        </div>
+
+        <div id="meepsBox" class="dialogue-box right hidden">
+          <p id="meepsText"></p>
+        </div>
       </div>
-      <img id="sceneImage" class="scene-image hidden" alt="Scene" />
+
+      <div id="choices">
+        <button id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+      </div>
+
     </div>
 
-    <div id="dialogue">
-      <div id="barthyBox" class="dialogue-box left hidden">
-        <p id="barthyText"></p>
-      </div>
-
-      <div id="meepsBox" class="dialogue-box right hidden">
-        <p id="meepsText"></p>
-      </div>
+    <div id="endScreen" class="hidden">
+      <div id="endTitle">THE END</div>
+      <button id="restartBtn">Restart</button>
     </div>
 
-    <div id="choices">
-      <button id="yesBtn">Yes</button>
-      <button id="noBtn">No</button>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="modal" class="hidden">
-    <div class="modal-content">
-      <p id="modalText"></p>
-      <div class="modal-buttons">
-        <button id="modalYes">Yes</button>
-        <button id="modalNo">No</button>
+    <!-- Modal -->
+    <div id="modal" class="hidden">
+      <div class="modal-content">
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+          <button id="modalYes">Yes</button>
+          <button id="modalNo">No</button>
+        </div>
       </div>
     </div>
   </div>
