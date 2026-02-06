@@ -104,7 +104,7 @@ function modifyPositionOffset(state) {
 function applySceneOffset(state) {
 
   if (state.sceneOffsetX !== undefined) {
-    characterMemory.scene.x += state.sceneOffsetX;
+    characterMemory.scene.x = state.sceneOffsetX;
   }
 
   applyScenePosition();
@@ -188,13 +188,13 @@ function showDialogue(speaker, text) {
 }
 
 function showChoices() {
-  yesBtn.style.display = "inline-block";
-  noBtn.style.display = "inline-block";
+  yesBtn.style.visibility = "visible";
+  noBtn.style.visibility = "visible";
 }
 
 function hideChoices() {
-  yesBtn.style.display = "none";
-  noBtn.style.display = "none";
+  yesBtn.style.visibility = "hidden";
+  noBtn.style.visibility = "hidden";
 }
 
 
@@ -323,6 +323,54 @@ function playAnimation(animation, stateNext) {
 
 }
 
+function fireFireworks() {
+
+  var duration = 15 * 1000;
+  var animationEnd = Date.now() + duration;
+
+  var defaults = {
+    startVelocity: 30,
+    spread: 360,
+    ticks: 60,
+    zIndex: 999,
+    colors: ["#ff4d88", "#ff99cc", "#ffffff"]
+  };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  var interval = setInterval(function () {
+
+    var timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    var particleCount = 50 * (timeLeft / duration);
+
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: {
+        x: randomInRange(0.1, 0.3),
+        y: Math.random() - 0.2
+      }
+    });
+
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: {
+        x: randomInRange(0.7, 0.9),
+        y: Math.random() - 0.2
+      }
+    });
+
+  }, 250);
+
+}
 
 
 /* =====================================================
@@ -397,6 +445,9 @@ function goToState(stateKey) {
 
   showDialogue(state.speaker, state.text);
 
+  if (state.effect === "fireworks") {
+    fireFireworks();
+  }
 
   /* ---------- CHOICES ---------- */
 
@@ -624,7 +675,7 @@ const states = {
 
   embrace: {
     sceneImage: "assets/embrace.png",
-    sceneOffsetX: 0,
+    sceneOffsetX: -150,
     next: "ask_valentine_again"
   },
 
@@ -642,23 +693,42 @@ const states = {
   },
 
   yes_happy: {
-    barthyImage: "assets/barthy_excited.png",
-    meepsImage: "assets/meeps_happy.png",
+    barthyImage: "assets/barthy_jumping.png",
+    meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "barthy",
-    text: "Yaay! I'm so excited to be spending valentines with you",
+    text: "YAAYY!! I'm so excited to be spending Valentines with you",
+    effect: "fireworks",
     next: "end_happy"
   },
 
   end_happy: {
     barthyImage: "assets/barthy_happy.png",
-    meepsImage: "assets/meeps_happy.png",
+    meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "barthy",
+    text: "We'll be making some potteries, candles, and enjoy a beautiful dinner together! It'll be really funnn!!",
+    next: "end_2"
+  },
+
+  end_2: {
+    barthyImage: "assets/barthy_happy.png",
+    meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "meeps",
-    text: "Pottery. Candles. Dinner. Valentines together"
+    text: "Woohoo! That sounds really fun.. I can't wait!",
+    next: "end_3"
   },
+
+  end_3: {
+    sceneImage: "assets/kiss.png",
+    sceneOffsetX: 0,
+    // next: "end_4"
+  },
+
 
   end_sad: {
     barthyImage: "assets/barthy_sad.png",
@@ -668,7 +738,6 @@ const states = {
     speaker: "barthy",
     text: "Oh well… maybe next year"
   }
-
 };
 
 
