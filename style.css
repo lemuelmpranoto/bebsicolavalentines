@@ -158,38 +158,6 @@ button {
   100% { transform: translateX(0); }
 }
 
-/* .walking-left {
-  animation: walkRight 1.2s ease forwards;
-}
-
-.walking-right {
-  animation: walkLeft 1.2s ease forwards;
-}
-
-@keyframes walkRight {
-  to { transform: translateX(260px); }
-}
-
-@keyframes walkLeft {
-  to { transform: translateX(-260px); }
-}
-
-.walking-away-left {
-  animation: walkAwayLeft 1s ease forwards;
-}
-
-.walking-back-right {
-  animation: walkBackRight 1s ease forwards;
-}
-
-@keyframes walkAwayLeft {
-  to { transform: translateX(-200px); }
-}
-
-@keyframes walkBackRight {
-  to { transform: translateX(200px); }
-} */
-
 /* Modal */
 
 #modal {

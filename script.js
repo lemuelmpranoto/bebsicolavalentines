@@ -393,7 +393,6 @@ function goToState(stateKey) {
 
   }
 
-
   /* ---------- DIALOGUE ---------- */
 
   showDialogue(state.speaker, state.text);
@@ -406,7 +405,6 @@ function goToState(stateKey) {
     return;
   }
 
-
   /* ---------- MODAL ---------- */
 
   if (state.modal) {
@@ -418,14 +416,12 @@ function goToState(stateKey) {
     return;
   }
 
-
   /* ---------- ANIMATION ---------- */
 
   if (state.animation) {
     playAnimation(state.animation, state.next);
     return;
   }
-
 
   /* ---------- AUTO NEXT ---------- */
 
@@ -438,7 +434,6 @@ function goToState(stateKey) {
   }
 
 }
-
 
 /* =====================================================
    STATES
@@ -503,7 +498,6 @@ const states = {
     meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-
     speaker: "barthy",
     text: "Will you be my valentines?",
     choices: true
@@ -574,6 +568,7 @@ const states = {
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "meeps",
+    delay: 3000,
     text: "Ask me again.. Hehhe",
     next: "ask_valentine"
   },
@@ -584,11 +579,6 @@ const states = {
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     barthyOffsetX: -80,
-    // animation: {
-    //   type: "fall",
-    //   duration: 1000,
-    //   next: "barthy_fell"
-    // }
     next: "barthy_fell"
   },
 
@@ -597,11 +587,6 @@ const states = {
     meepsImage: "assets/meeps_shocked.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    // animation: {
-    //   type: "fall",
-    //   duration: 1000,
-    //   next: "barthy_faint"
-    // }
     next: "barthy_faint"
   },
 
@@ -651,6 +636,7 @@ const states = {
     barthyOffsetX: 270,
     meepsOffsetX: -250,
     speaker: "meeps",
+    delay: 3000,
     text: "Ask me again.. hehe",
     next: "ask_valentine"
   },
