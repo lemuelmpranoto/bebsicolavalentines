@@ -26,42 +26,34 @@ const restartBtn = document.getElementById("restartBtn");
 let currentState = null;
 let animationTimeout = null;
 
-
 /* =====================================================
    POSITION MEMORY SYSTEM
 ===================================================== */
 
 const characterMemory = {
-
   barthy: {
     x: -200,
     scale: "scale-large"
   },
-
   meeps: {
     x: -200,
     scale: "scale-small"
   },
-
   dragon: {
     x: 700,
     y: 500,
     scaleValue: 0.6,
     scale: "scale-extra-large"
   },
-
   scene: { x: 0 }
-
 };
 
 
 function applyCharacterPositions() {
   barthyContainer.style.left = characterMemory.barthy.x + "px";
   meepsContainer.style.right = characterMemory.meeps.x + "px";
-
   dragonContainer.style.left = characterMemory.dragon.x + "px";
   dragonContainer.style.bottom = characterMemory.dragon.y + "px";
-
   dragonContainer.style.transform =
     `scale(${characterMemory.dragon.scaleValue})`;
 }
@@ -73,44 +65,32 @@ function applyScenePosition() {
 
 
 function setCharacterScale(img, scaleClass, characterKey) {
-
   img.classList.remove("scale-small", "scale-large");
-
   if (scaleClass) {
     img.classList.add(scaleClass);
     characterMemory[characterKey].scale = scaleClass;
   }
-
 }
 
 function modifyPositionOffset(state) {
-
   let changed = false;
-
   if (state.barthyOffsetX !== undefined) {
     characterMemory.barthy.x += state.barthyOffsetX;
     changed = true;
   }
-
   if (state.meepsOffsetX !== undefined) {
     characterMemory.meeps.x += state.meepsOffsetX;
     changed = true;
   }
-
   if (changed) {
-
     // Disable transition temporarily
     const oldBarthyTransition = barthyContainer.style.transition;
     const oldMeepsTransition = meepsContainer.style.transition;
-
     barthyContainer.style.transition = "none";
     meepsContainer.style.transition = "none";
-
     applyCharacterPositions();
-
     // Force reflow
     barthyContainer.offsetHeight;
-
     // Restore transition
     barthyContainer.style.transition = oldBarthyTransition;
     meepsContainer.style.transition = oldMeepsTransition;
@@ -118,11 +98,9 @@ function modifyPositionOffset(state) {
 }
 
 function applySceneOffset(state) {
-
   if (state.sceneOffsetX !== undefined) {
     characterMemory.scene.x = state.sceneOffsetX;
   }
-
   applyScenePosition();
 }
 
@@ -168,14 +146,11 @@ function hideDragon() {
 
 
 function showScene(src, fullscreen = false) {
-
   sceneImage.src = src;
-
   if (fullscreen)
     sceneImage.classList.add("fullscreen-overlay");
   else
     sceneImage.classList.remove("fullscreen-overlay");
-
   sceneImage.classList.remove("hidden");
 }
 
@@ -184,16 +159,12 @@ function hideScene() {
 }
 
 function setImageSafely(imgEl, src, showFn) {
-
   imgEl.style.visibility = "hidden";
   imgEl.style.opacity = "0";
-
   imgEl.onload = null;
   imgEl.src = src;
-
   if (imgEl.complete) showFn();
   else imgEl.onload = showFn;
-
 }
 
 
@@ -207,19 +178,15 @@ function hideDialogue() {
 }
 
 function showDialogue(speaker, text) {
-
   if (!speaker || !text) return;
-
   if (speaker === "barthy") {
     barthyText.textContent = text;
     barthyBox.classList.remove("hidden");
   }
-
   if (speaker === "meeps") {
     meepsText.textContent = text;
     meepsBox.classList.remove("hidden");
   }
-
 }
 
 function showChoices() {
@@ -241,14 +208,11 @@ function hideEndScreen() {
 }
 
 function resetGame() {
-
   characterMemory.barthy.x = -200;
   characterMemory.meeps.x = -200;
-
   characterMemory.dragon.x = 700;
   characterMemory.dragon.y = 500;
   characterMemory.dragon.scaleValue = 0.6;
-
   characterMemory.scene.x = 0;
 
   hideDragon();
@@ -256,9 +220,7 @@ function resetGame() {
   hideDialogue();
   hideChoices();
   hideEndScreen();
-
   applyCharacterPositions();
-
   goToState("intro");
 }
 
@@ -267,20 +229,16 @@ function resetGame() {
 ===================================================== */
 
 function showModalPrompt({ text, yes, no }) {
-
   modalText.textContent = text;
   modal.classList.remove("hidden");
-
   modalYes.onclick = () => {
     modal.classList.add("hidden");
     goToState(yes);
   };
-
   modalNo.onclick = () => {
     modal.classList.add("hidden");
     goToState(no);
   };
-
 }
 
 
@@ -382,56 +340,41 @@ function playAnimation(animation, stateNext) {
   });
 
 }
-
-function fireFireworks() {
-
-  var duration = 15 * 1000;
-  var animationEnd = Date.now() + duration;
-
-  var defaults = {
-    startVelocity: 30,
-    spread: 360,
-    ticks: 60,
-    zIndex: 999,
-    colors: ["#ff4d88", "#ff99cc", "#ffffff"]
-  };
-
-  function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  var interval = setInterval(function () {
-
-    var timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
-
-    var particleCount = 50 * (timeLeft / duration);
-
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: {
-        x: randomInRange(0.1, 0.3),
-        y: Math.random() - 0.2
-      }
-    });
-
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: {
-        x: randomInRange(0.7, 0.9),
-        y: Math.random() - 0.2
-      }
-    });
-
-  }, 250);
-
+function createFallingHeart() {
+  const heart = document.createElement("div");
+  heart.classList.add("heart");
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.top = "-40px";
+  heart.style.animationDuration =
+    (Math.random() * 2 + 3) + "s";
+  heart.style.opacity = Math.random();
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 5000);
 }
 
+function fireLoveExplosion() {
+  const duration = 5000;
+  const intervalTime = 80;
+  const total = duration / intervalTime;
+  let count = 0;
+  const interval = setInterval(() => {
+    /* Use default confetti */
+    confetti({
+      particleCount: 5,
+      spread: 120,
+      colors: ["#ff4d88", "#ff99cc", "#ffd700", "#ffffff"],
+      origin: {
+        x: Math.random(),
+        y: Math.random() * 0.6
+      }
+    });
+    createFallingHeart();
+    count++;
+    if (count >= total) {
+      clearInterval(interval);
+    }
+  }, intervalTime);
+}
 
 /* =====================================================
    STATE ENGINE
@@ -521,8 +464,8 @@ function goToState(stateKey) {
 
   showDialogue(state.speaker, state.text);
 
-  if (state.effect === "fireworks") {
-    fireFireworks();
+  if (state.effect === "loveExplosion") {
+    fireLoveExplosion();
   }
 
   /* ---------- CHOICES ---------- */
@@ -776,7 +719,7 @@ const states = {
     meepsScale: "scale-small",
     speaker: "barthy",
     text: "YAAYY!! I'm so excited to be spending Valentines with you",
-    effect: "fireworks",
+    effect: "loveExplosion",
     next: "end_happy"
   },
 

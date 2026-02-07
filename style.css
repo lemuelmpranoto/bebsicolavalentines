@@ -311,3 +311,50 @@ button {
   75%  { transform: translateX(-5px); }
   100% { transform: translateX(0); }
 }
+
+/* =========================================
+   HEART-SHAPED CONFETTI
+========================================= */
+
+.heart {
+  position: fixed;
+  top: -40px;
+  width: 20px;
+  height: 20px;
+  background: red;
+  transform: rotate(45deg);
+  animation: fall linear forwards;
+  z-index: 9998;
+}
+
+
+.heart:before,
+.heart:after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: red;
+  border-radius: 50%;
+}
+
+.heart:before {
+  top: -10px;
+  left: 0;
+}
+
+.heart:after {
+  top: 0;
+  left: -10px;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-50px) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(90deg);
+    opacity: 0;
+  }
+}
