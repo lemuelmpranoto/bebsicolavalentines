@@ -584,6 +584,7 @@ const states = {
     meepsImage: "assets/meeps_wave.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
+    // meepsOffsetX: 20,
     speaker: "meeps",
     text: "Hi Barthy",
     next: "barthy_meeps_walking"
@@ -615,8 +616,8 @@ const states = {
     sceneImage: "assets/hug.png",
     delay: 1000,
     sceneOffsetX: 60,
-    barthyOffsetX: -40,
-    meepsOffsetX: -40,
+    barthyOffsetX: -60,
+    meepsOffsetX: -60,
     next: "ask_valentine"
   },
 
@@ -695,7 +696,7 @@ const states = {
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "meeps",
-    delay: 3000,
+    delay: 2000,
     text: "Ask me again.. Hehhe",
     next: "ask_valentine"
   },
@@ -763,7 +764,7 @@ const states = {
     barthyOffsetX: 270,
     meepsOffsetX: -250,
     speaker: "meeps",
-    delay: 3000,
+    delay: 2000,
     text: "Ask me again.. hehe",
     next: "ask_valentine"
   },
@@ -781,7 +782,7 @@ const states = {
 
   end_happy: {
     barthyImage: "assets/barthy_happy.png",
-    meepsImage: "assets/meeps.png",
+    meepsImage: "assets/meeps_excited.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "barthy",
@@ -791,7 +792,7 @@ const states = {
 
   end_2: {
     barthyImage: "assets/barthy_happy.png",
-    meepsImage: "assets/meeps.png",
+    meepsImage: "assets/meeps_excited.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "meeps",

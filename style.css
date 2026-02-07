@@ -1,76 +1,94 @@
+/* =========================================
+   GLOBAL
+========================================= */
+
 * {
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  overflow-y: hidden;
-}
-
-body {
-  margin: 0;
   height: 100vh;
-}
-
-#game {
-  position: relative;
-
-  width: 100vw;
-  height: 100vh;
-
   overflow: hidden;
 }
 
+
+/* =========================================
+   FONTS
+========================================= */
+
+@font-face {
+  font-family: "Dimbo";
+  src: url("assets/Dimbo.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Showpop";
+  src: url("assets/Showpop.ttf") format("truetype");
+}
+
+
+/* =========================================
+   BACKGROUND
+========================================= */
+
 #background {
   position: fixed;
-
-  top: 0;
-  left: 0;
-
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
 
   background-image: url("assets/background.png");
   background-size: cover;
-  background-position: center center;
+  background-position: center;
   background-repeat: no-repeat;
 
   z-index: -1;
 }
 
 
+/* =========================================
+   GAME CONTAINER
+========================================= */
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
 #app {
   position: absolute;
-
   left: 50%;
   bottom: 30%;
-
   transform: translateX(-50%);
-
   width: 90%;
   max-width: 500px;
-
   z-index: 10;
 }
 
 #scene {
   position: relative;
   height: 300px;
-  /* margin-bottom: 16px; */
 }
 
-/* Characters */
+
+/* =========================================
+   CHARACTERS
+========================================= */
 
 .character-container {
   position: absolute;
   bottom: 0;
+  width: 260px;
+  height: 260px;
   transition: left 0.4s ease, right 0.4s ease;
 }
 
 .character {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
   height: 260px;
   width: auto;
   object-fit: contain;
@@ -80,24 +98,16 @@ body {
     opacity 0.15s ease;
 }
 
-.character.left {
-  left: 0;
-}
-
-.character.right {
-  right: 0;
-}
-
 .scale-small {
-  transform: scale(0.9);
+  transform: translateX(-50%) scale(0.9);
 }
 
 .scale-large {
-  transform: scale(1.0);
+  transform: translateX(-50%) scale(1);
 }
 
 .scale-extra-large {
-  transform: scale(1.5);
+  transform: translateX(-50%) scale(1.5);
 }
 
 #barthyContainer {
@@ -108,32 +118,30 @@ body {
   right: -200px;
 }
 
-/* Scene image */
+
+/* =========================================
+   SCENE IMAGE
+========================================= */
 
 .scene-image {
   position: absolute;
   bottom: 0;
   left: 0;
-  transform: translateX(0);
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  z-index: 5;
   opacity: 1;
   visibility: visible;
+  z-index: 5;
   transition: opacity 0.15s ease;
 }
 
 .fullscreen-overlay {
   position: fixed !important;
-
   bottom: 0;
   left: 0;
-
   width: 100vw !important;
-
   object-fit: cover;
-
   z-index: 9999;
 }
 
@@ -142,49 +150,62 @@ body {
   visibility: hidden;
 }
 
-/* Dialogue */
+
+/* =========================================
+   DIALOGUE
+========================================= */
 
 #dialogue {
   position: relative;
-  height: 90px;
-  margin-bottom: 12px;
+  margin: 12px 0;
+  min-height: 110px;
 }
 
 .dialogue-box {
   position: absolute;
-  bottom: 0;
-  max-width: 70%;
-  padding: 10px 14px;
+  top: 100%;
+  padding: 0px 20px;
   border-radius: 16px;
-  background: white;
-  font-size: 15px;
+  margin-top: 20px;
+  font-family: "Dimbo", sans-serif;
+  font-size: 25px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  width: max-content;
+  max-width: min(300px, 80vw);
+  z-index: 50;
 }
 
-.dialogue-box.left {
-  left: 0;
+#barthyBox {
+  right: 50px;
   background: #e6f0ff;
 }
 
-.dialogue-box.right {
-  right: 0;
+#meepsBox {
+  left: 50px;
   background: #ffe6f0;
 }
 
-/* Choices */
+
+/* =========================================
+   CHOICES
+========================================= */
 
 #choices {
   display: flex;
   justify-content: center;
   gap: 16px;
-  height: 50px;
-  align-items: center;
+  margin-top: 140px;
 }
 
 button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 999px;
+  padding: 15px 30px;
+  font-family: "Dimbo", sans-serif;
+  font-size: 20px;
   border: none;
+  border-radius: 999px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -202,26 +223,15 @@ button {
   background: #ccc;
 }
 
-/* Animations */
 
-.shake {
-  animation: shake 0.4s;
-}
-
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-
-/* Modal */
+/* =========================================
+   MODAL
+========================================= */
 
 #modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -236,25 +246,27 @@ button {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  text-align: center;
+  font-family: "Dimbo", sans-serif;
+  font-size: 30px;
+  letter-spacing: 1px;
   width: 80%;
-  max-width: 320px;
+  max-width: 400px;
+  text-align: center;
 }
+
+
+/* =========================================
+   END SCREEN
+========================================= */
 
 #endScreen {
   position: fixed;
   inset: 0;
-
-  width: 100vw;
-  height: 100vh;
-
-  background: rgba(0,0,0,0.75);
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
+  background: rgba(0,0,0,0.75);
   z-index: 10000;
 }
 
@@ -263,17 +275,18 @@ button {
 }
 
 #endTitle {
-  font-size: 48px;
+  font-family: "Showpop", sans-serif;
+  font-size: 60px;
   color: white;
   margin-bottom: 20px;
-  text-shadow: 0 0 20px red;
 }
 
 #restartBtn {
   padding: 12px 24px;
-  font-size: 18px;
-  border-radius: 999px;
+  font-family: "Dimbo", sans-serif;
+  font-size: 25px;
   border: none;
+  border-radius: 999px;
   background: #ff4d88;
   color: white;
   cursor: pointer;
@@ -281,4 +294,20 @@ button {
 
 #restartBtn:hover {
   transform: scale(1.1);
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-5px); }
+  50%  { transform: translateX(5px); }
+  75%  { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
 }
