@@ -55,14 +55,42 @@
     <!-- Modal -->
     <div id="modal" class="hidden">
       <div class="modal-content">
+
         <p id="modalText"></p>
+
+        <p id="modalError" style="
+          color: red;
+          font-size: 18px;
+          margin-top: 10px;
+          min-height: 22px;
+        "></p>
+
         <div class="modal-buttons">
           <button id="modalYes">Yes</button>
           <button id="modalNo">No</button>
         </div>
+
       </div>
     </div>
+
+
+  <div id="captchaModal" class="hidden">
+    <div class="modal-content">
+      <p id="captchaQuestion">
+        What is Barthy's favorite Meeps?
+      </p>
+
+      <div class="captcha-options">
+        <button class="captchaOption">A) Meeps</button>
+        <button class="captchaOption">B) Meeps</button>
+        <button class="captchaOption">C) Meeps</button>
+        <button class="captchaOption correct">D) All of the above</button>
+      </div>
+
+      <p id="captchaError" style="color:red; margin-top:10px;"></p>
+    </div>
   </div>
+
 
   <audio id="bgMusic" src="assets/background_music.mp3" loop></audio>
   <audio id="yaySound" src="assets/yay_sound_effect.mp3" preload="auto"></audio>

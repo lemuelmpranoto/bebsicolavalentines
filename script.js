@@ -336,26 +336,76 @@ function resetGame() {
 ===================================================== */
 
 function showModalPrompt({ text, yes, no }) {
+
   modalText.textContent = text;
+  modalError.textContent = "";
+
   modal.classList.remove("hidden");
+
   modalYes.onclick = () => {
+
     modal.classList.add("hidden");
+
+    dragonNoStrikeCount = 0;
+
     if (yes === "meeps_approach_barthy") {
       stopLonelyMusic();
     }
+
     goToState(yes);
   };
+
   modalNo.onclick = () => {
+
+    if (no === "dragon_enters") {
+
+      dragonNoStrikeCount++;
+
+      if (dragonNoStrikeCount === 1) {
+
+        modalError.textContent =
+          "Wrong answer. Try again.";
+
+        modalError.classList.add("shake");
+
+        return;
+      }
+
+      if (dragonNoStrikeCount === 2) {
+
+        modalError.textContent =
+          "Suspicious Meeps detected. Must solve captcha before proceeding.";
+
+        modalError.classList.add("shake");
+
+        return;
+      }
+
+      // third click → captcha
+      modal.classList.add("hidden");
+
+      showCaptcha(no);
+
+      dragonNoStrikeCount = 0;
+
+      return;
+    }
+
+    // normal modal behavior
     modal.classList.add("hidden");
+
     if (no === "meeps_calls_back") {
       stopLonelyMusic();
     }
-    if (no === "end_sad") {
-      stopLonelyMusic();
-    }
+
     goToState(no);
   };
 }
+
+const modalError = document.getElementById("modalError");
+
+let dragonNoStrikeCount = 0;
+
 
 
 /* =====================================================
@@ -1112,4 +1162,54 @@ function stopLonelyMusic() {
   resumeBackgroundMusic();
 }
 
+/* =====================================================
+   CAPTCHA MODAL
+===================================================== */
 
+const captchaModal = document.getElementById("captchaModal");
+const captchaError = document.getElementById("captchaError");
+
+let captchaNextState = null;
+
+function showCaptcha(nextState) {
+
+  captchaNextState = nextState;
+
+  captchaModal.classList.remove("hidden");
+
+  captchaError.textContent = "";
+
+}
+
+
+document.querySelectorAll(".captchaOption").forEach(btn => {
+
+  btn.onclick = () => {
+
+    if (!captchaNextState) return;
+
+    if (btn.classList.contains("correct")) {
+
+      captchaModal.classList.add("hidden");
+
+      const next = captchaNextState;
+      captchaNextState = null;
+
+      goToState(next);
+
+    } else {
+
+      captchaError.textContent =
+        "Wrong answer. Barthy is disappointed in you.";
+
+      btn.classList.add("shake");
+
+      setTimeout(() => {
+        btn.classList.remove("shake");
+      }, 400);
+
+    }
+
+  };
+
+});
