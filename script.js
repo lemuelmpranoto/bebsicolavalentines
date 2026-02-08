@@ -34,6 +34,10 @@ const dragonSound = document.getElementById("dragonSound");
 let currentState = null;
 let animationTimeout = null;
 
+let typewriterTimeout = null;
+let typewriterSpeed = 35;
+let resolveCurrentDialogue = null;
+
 /* =====================================================
    POSITION MEMORY SYSTEM
 ===================================================== */
@@ -180,22 +184,117 @@ function setImageSafely(imgEl, src, showFn) {
    UI HELPERS
 ===================================================== */
 
+function measureDialogueSize(text, textElement, boxElement) {
+
+  // reset current box size
+  boxElement.style.width = "auto";
+  boxElement.style.height = "auto";
+
+  // create a fresh measuring box
+  const measureBox = document.createElement("div");
+  measureBox.className = "dialogue-box";
+
+  const measureText = document.createElement("p");
+
+  // copy font styles from real element
+  const computed = window.getComputedStyle(textElement);
+  measureText.style.fontFamily = computed.fontFamily;
+  measureText.style.fontSize = computed.fontSize;
+  measureText.style.letterSpacing = computed.letterSpacing;
+  measureText.style.whiteSpace = "normal";
+
+  measureText.textContent = text;
+
+  measureBox.appendChild(measureText);
+  document.body.appendChild(measureBox);
+
+  const rect = measureBox.getBoundingClientRect();
+
+  document.body.removeChild(measureBox);
+
+  // apply exact size
+  boxElement.style.width = rect.width + "px";
+  boxElement.style.height = rect.height + "px";
+}
+
+
+
 function hideDialogue() {
+
   barthyBox.classList.add("hidden");
   meepsBox.classList.add("hidden");
+
+  if (typewriterTimeout) {
+    clearTimeout(typewriterTimeout);
+    typewriterTimeout = null;
+  }
+
+  if (resolveCurrentDialogue) {
+    resolveCurrentDialogue();
+    resolveCurrentDialogue = null;
+  }
+
 }
 
 function showDialogue(speaker, text) {
-  if (!speaker || !text) return;
-  if (speaker === "barthy") {
-    barthyText.textContent = text;
-    barthyBox.classList.remove("hidden");
-  }
-  if (speaker === "meeps") {
-    meepsText.textContent = text;
-    meepsBox.classList.remove("hidden");
-  }
+
+  return new Promise(resolve => {
+
+    resolveCurrentDialogue = resolve;
+
+    if (!speaker || !text) {
+      resolveCurrentDialogue = null;
+      resolve();
+      return;
+    }
+
+    const textElement =
+      speaker === "barthy" ? barthyText : meepsText;
+
+    const boxElement =
+      speaker === "barthy" ? barthyBox : meepsBox;
+
+    boxElement.classList.remove("hidden");
+
+    if (typewriterTimeout) {
+      clearTimeout(typewriterTimeout);
+      typewriterTimeout = null;
+    }
+
+    measureDialogueSize(text, textElement, boxElement);
+
+    textElement.textContent = "";
+
+    let index = 0;
+
+    function typeNext() {
+
+      if (index < text.length) {
+
+        textElement.textContent += text[index];
+        index++;
+
+        typewriterTimeout =
+          setTimeout(typeNext, typewriterSpeed);
+
+      }
+      else {
+
+        resolveCurrentDialogue = null;
+
+        setTimeout(resolve, 1000);
+
+      }
+
+    }
+
+    typeNext();
+
+  });
+
 }
+
+
 
 function showChoices() {
   document.getElementById("choices").style.display = "flex";
@@ -297,6 +396,17 @@ function playAnimation(animation, stateNext) {
 
     const endX = memory.x + (distance * multiplier);
 
+    const img =
+      character === "barthy"
+        ? barthyImage
+        : character === "meeps"
+        ? meepsImage
+        : dragonImage;
+
+    // START wiggle
+    img.classList.add("walk-wiggle");
+
+
     // ONLY dragon uses Y animation
     if (character === "dragon") {
 
@@ -336,13 +446,14 @@ function playAnimation(animation, stateNext) {
     // Barthy and Meeps use original animation
     else {
 
-      container.style.transition = `${property} ${duration}ms ease`;
+      container.style.transition = `${property} ${duration}ms linear`;
       container.style[property] = endX + "px";
 
       setTimeout(() => {
 
         memory.x = endX;
         container.style.transition = "";
+        img.classList.remove("walk-wiggle");
 
         finishedCount++;
 
@@ -474,12 +585,19 @@ function goToState(stateKey) {
   }
 
   /* ---------- DIALOGUE ---------- */
+
   if (state.effect === "endScreen") {
     showEndScreen();
     return;
   }
 
-  showDialogue(state.speaker, state.text);
+  let dialoguePromise = Promise.resolve();
+
+  if (state.text) {
+    dialoguePromise = showDialogue(state.speaker, state.text);
+  }
+
+  /* ---------- EFFECTS ---------- */
 
   if (state.effect === "loveExplosion") {
     fireLoveExplosion();
@@ -491,10 +609,10 @@ function goToState(stateKey) {
   }
 
   if (stateKey === "dragon_enters") {
-  dragonSound.currentTime = 0;
-  dragonSound.volume = 0.7; // optional
-  dragonSound.play().catch(() => {});
-}
+    dragonSound.currentTime = 0;
+    dragonSound.volume = 0.7;
+    dragonSound.play().catch(() => {});
+  }
 
   /* ---------- CHOICES ---------- */
 
@@ -506,11 +624,9 @@ function goToState(stateKey) {
   /* ---------- MODAL ---------- */
 
   if (state.modal) {
-
     setTimeout(() => {
       showModalPrompt(state.modal);
     }, 600);
-
     return;
   }
 
@@ -525,11 +641,23 @@ function goToState(stateKey) {
 
   if (state.next) {
 
-    animationTimeout = setTimeout(() => {
-      goToState(state.next);
-    }, state.delay || 1500);
+    dialoguePromise.then(() => {
+
+      const waitTime =
+        state.delay !== undefined
+          ? state.delay
+          : (state.text ? 0 : 2000);
+
+      animationTimeout = setTimeout(() => {
+
+        goToState(state.next);
+
+      }, waitTime);
+
+    });
 
   }
+
 
 }
 
@@ -589,6 +717,37 @@ const states = {
     sceneOffsetX: 60,
     barthyOffsetX: -60,
     meepsOffsetX: -60,
+    delay: 2000,
+    next: "barthy_vals_1"
+  },
+
+  barthy_vals_1: {
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "barthy",
+    text: "Soo its vals day soon",
+    next: "barthy_vals_2"
+  },
+
+  barthy_vals_2: {
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "barthy",
+    text: "And I don’t have a valentines yet",
+    next: "barthy_vals_3"
+  },
+
+  barthy_vals_3: {
+    barthyImage: "assets/barthy.png",
+    meepsImage: "assets/meeps.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "barthy",
+    text: "I want to spend valentines day with you",
     next: "ask_valentine"
   },
 
@@ -697,7 +856,7 @@ const states = {
     modal: {
       text: "Is Meeps gonna help Barthy????",
       yes: "meeps_approach_barthy",
-      no: "end_sad"
+      no: "dragon_enters"
     }
   },
 
@@ -709,9 +868,10 @@ const states = {
     animation: {
       character: "meeps",
       direction: "right",
-      distance: 250,
+      distance: 320,
       duration: 1200,
     },
+    delay: 5000,
     next: "kiss_repeat"
   },
 
@@ -724,18 +884,29 @@ const states = {
   embrace: {
     sceneImage: "assets/embrace.png",
     sceneOffsetX: -150,
+    next: "meeps_relief_line"
+  },
+
+  meeps_relief_line: {
+    barthyImage: "assets/barthy_sad.png",
+    meepsImage: "assets/meeps_grin.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    barthyOffsetX: 220,
+    meepsOffsetX: -300,
+    speaker: "meeps",
+    text: "I'm glad you're okay Barthy. I was just joking",
     next: "ask_valentine_again"
   },
+
 
   ask_valentine_again: {
     barthyImage: "assets/barthy.png",
     meepsImage: "assets/meeps_grin.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
-    barthyOffsetX: 270,
-    meepsOffsetX: -250,
     speaker: "meeps",
-    delay: 2000,
+    delay: 1000,
     text: "Ask me again.. hehe",
     next: "ask_valentine"
   },
@@ -757,7 +928,7 @@ const states = {
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "barthy",
-    text: "We'll be making some potteries, candles, and enjoy a beautiful dinner together! It'll be really funnn!!",
+    text: "We'll be making our own potteries and candles, and enjoy some delicious food for dinner! It'll be really funnn!!",
     next: "end_2"
   },
 
@@ -768,12 +939,32 @@ const states = {
     meepsScale: "scale-small",
     speaker: "meeps",
     text: "Woohoo! That sounds really fun.. I can't wait!",
+    next: "love_line_1"
+  },
+
+  love_line_1: {
+    barthyImage: "assets/barthy_happy.png",
+    meepsImage: "assets/meeps_excited.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "barthy",
+    text: "I love you sooo much",
+    next: "love_line_2"
+  },
+
+  love_line_2: {
+    barthyImage: "assets/barthy_happy.png",
+    meepsImage: "assets/meeps_excited.png",
+    barthyScale: "scale-large",
+    meepsScale: "scale-small",
+    speaker: "meeps",
+    text: "Togetha forevaaa <3",
     next: "end_3"
   },
 
   end_3: {
     sceneImage: "assets/kiss.png",
-    sceneOffsetX: 0,
+    sceneOffsetX: 20,
     next: "end_screen_happy"
   },
 

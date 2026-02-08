@@ -118,7 +118,7 @@ html, body {
 #app {
   position: absolute;
   left: 50%;
-  top: 30%;
+  top: 35%;
   transform: translateX(-50%);
   width: 90%;
   max-width: 500px;
@@ -157,16 +157,20 @@ html, body {
 }
 
 .scale-small {
-  transform: translateX(-50%) scale(0.9);
+  --char-scale: 0.9;
+  transform: translateX(-50%) scale(var(--char-scale));
 }
 
 .scale-large {
-  transform: translateX(-50%) scale(1);
+  --char-scale: 1;
+  transform: translateX(-50%) scale(var(--char-scale));
 }
 
 .scale-extra-large {
-  transform: translateX(-50%) scale(1.5);
+  --char-scale: 1.5;
+  transform: translateX(-50%) scale(var(--char-scale));
 }
+
 
 #barthyContainer {
   left: -200px;
@@ -231,7 +235,7 @@ html, body {
   letter-spacing: 1px;
   white-space: normal;
   overflow-wrap: break-word;
-  width: max-content;
+  /* width: max-content; */
   max-width: min(300px, 80vw);
   z-index: 50;
 }
@@ -369,6 +373,37 @@ button {
   75%  { transform: translateX(-5px); }
   100% { transform: translateX(0); }
 }
+
+@keyframes wiggleWalk {
+
+  0% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg) scale(var(--char-scale, 1));
+  }
+
+  25% {
+    transform: translateX(-50%) translateY(-10px) rotate(-3deg) scale(var(--char-scale, 1));
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg) scale(var(--char-scale, 1));
+  }
+
+  75% {
+    transform: translateX(-50%) translateY(-10px) rotate(3deg) scale(var(--char-scale, 1));
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg) scale(var(--char-scale, 1));
+  }
+
+}
+
+.walk-wiggle {
+  animation: wiggleWalk 0.35s infinite linear;
+  transform-origin: bottom center;
+}
+
+
 
 /* =========================================
    HEART-SHAPED CONFETTI
