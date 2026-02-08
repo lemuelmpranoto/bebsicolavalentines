@@ -1,3 +1,6 @@
+const startScreen = document.getElementById("startScreen");
+const startBtn = document.getElementById("startBtn");
+
 const barthyContainer = document.getElementById("barthyContainer");
 const meepsContainer = document.getElementById("meepsContainer");
 const dragonContainer = document.getElementById("dragonContainer");
@@ -22,6 +25,11 @@ const modalNo = document.getElementById("modalNo");
 const endScreen = document.getElementById("endScreen");
 const restartBtn = document.getElementById("restartBtn");
 
+const bgMusic = document.getElementById("bgMusic");
+const yaySound = document.getElementById("yaySound");
+const lonelyAudio = document.getElementById("lonelyAudio");
+const slipSound = document.getElementById("slipSound");
+const dragonSound = document.getElementById("dragonSound");
 
 let currentState = null;
 let animationTimeout = null;
@@ -190,14 +198,13 @@ function showDialogue(speaker, text) {
 }
 
 function showChoices() {
-  yesBtn.style.visibility = "visible";
-  noBtn.style.visibility = "visible";
+  document.getElementById("choices").style.display = "flex";
 }
 
 function hideChoices() {
-  yesBtn.style.visibility = "hidden";
-  noBtn.style.visibility = "hidden";
+  document.getElementById("choices").style.display = "none";
 }
+
 
 function showEndScreen() {
   endScreen.classList.remove("hidden");
@@ -221,6 +228,7 @@ function resetGame() {
   hideChoices();
   hideEndScreen();
   applyCharacterPositions();
+  resumeBackgroundMusic();
   goToState("intro");
 }
 
@@ -233,10 +241,19 @@ function showModalPrompt({ text, yes, no }) {
   modal.classList.remove("hidden");
   modalYes.onclick = () => {
     modal.classList.add("hidden");
+    if (yes === "meeps_approach_barthy") {
+      stopLonelyMusic();
+    }
     goToState(yes);
   };
   modalNo.onclick = () => {
     modal.classList.add("hidden");
+    if (no === "meeps_calls_back") {
+      stopLonelyMusic();
+    }
+    if (no === "end_sad") {
+      stopLonelyMusic();
+    }
     goToState(no);
   };
 }
@@ -468,6 +485,17 @@ function goToState(stateKey) {
     fireLoveExplosion();
   }
 
+  if (stateKey === "barthy_falling") {
+    slipSound.currentTime = 0;
+    slipSound.play();
+  }
+
+  if (stateKey === "dragon_enters") {
+  dragonSound.currentTime = 0;
+  dragonSound.volume = 0.7; // optional
+  dragonSound.play().catch(() => {});
+}
+
   /* ---------- CHOICES ---------- */
 
   if (state.choices) {
@@ -529,7 +557,7 @@ const states = {
     meepsScale: "scale-small",
     // meepsOffsetX: 20,
     speaker: "meeps",
-    text: "Hi Barthy",
+    text: "Hi Barthy!",
     next: "barthy_meeps_walking"
   },
 
@@ -725,7 +753,7 @@ const states = {
 
   end_happy: {
     barthyImage: "assets/barthy_happy.png",
-    meepsImage: "assets/meeps_excited.png",
+    meepsImage: "assets/meeps.png",
     barthyScale: "scale-large",
     meepsScale: "scale-small",
     speaker: "barthy",
@@ -816,12 +844,81 @@ noBtn.addEventListener("mouseenter", () => {
    CLICK EVENTS
 ===================================================== */
 
-yesBtn.onclick = () => goToState("yes_happy");
-noBtn.onclick = () => goToState("no_cry");
+yesBtn.onclick = () => {
+
+  // stopLonelyAudio();
+
+  // rewind so it can replay instantly if clicked again
+  yaySound.currentTime = 0;
+
+  yaySound.play();
+
+  goToState("yes_happy");
+};
+
+noBtn.onclick = () => {
+  // pauseBackgroundMusic();
+  playLonelyMusic();
+  goToState("no_cry");
+
+}
 restartBtn.onclick = resetGame;
 
 /* =====================================================
    START GAME
 ===================================================== */
 
-goToState("intro");
+startBtn.onclick = () => {
+
+  // hide start screen
+  startScreen.classList.add("hidden");
+
+  // start music
+  bgMusic.volume = 0.5;
+  bgMusic.play();
+
+  // start game
+  goToState("intro");
+};
+
+// goToState("intro");
+// playBackgroundMusic();
+
+/* =====================================================
+   MUSIC
+===================================================== */
+
+let bgMusicWasPlaying = false;
+
+function playBackgroundMusic() {
+  bgMusic.volume = 0.5;
+  bgMusic.play().catch(() => {});
+}
+
+function resumeBackgroundMusic() {
+  if (bgMusicWasPlaying) {
+    bgMusic.play().catch(() => {});
+  }
+}
+
+function pauseBackgroundMusic() {
+  if (!bgMusic.paused) {
+    bgMusicWasPlaying = true;
+    bgMusic.pause();
+  }
+}
+
+function playLonelyMusic() {
+  pauseBackgroundMusic();
+  lonelyAudio.currentTime = 0;
+  lonelyAudio.volume = 0.6;
+  lonelyAudio.play().catch(() => {});
+}
+
+function stopLonelyMusic() {
+  lonelyAudio.pause();
+  lonelyAudio.currentTime = 0;
+  resumeBackgroundMusic();
+}
+
+

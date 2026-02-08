@@ -8,6 +8,14 @@
 </head>
 <body>
   <div id="background"></div>
+
+  <div id="startScreen">
+    <div id="startContent">
+      <h1 class="start-title">Click START Meeps (˶˃ ᵕ ˂˶)</h1>
+      <button id="startBtn">Start</button>
+    </div>
+  </div>
+
   <div id="game">
      <div id="app">
       <div id="scene">
@@ -55,6 +63,13 @@
       </div>
     </div>
   </div>
+
+  <audio id="bgMusic" src="assets/background_music.mp3" loop></audio>
+  <audio id="yaySound" src="assets/yay_sound_effect.mp3" preload="auto"></audio>
+  <audio id="lonelyAudio" src="assets/lonely.mp3" preload="auto"></audio>
+  <audio id="slipSound" src="assets/slip_sound_effect.mp3" preload="auto"></audio>
+  <audio id="dragonSound" src="assets/dragon.mp3" preload="auto"></audio>
+
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="script.js"></script>
