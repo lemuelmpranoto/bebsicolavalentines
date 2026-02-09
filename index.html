@@ -1,105 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Bebsicola Valentines</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div id="background"></div>
-
-  <div id="startScreen">
-    <div id="startContent">
-      <h1 class="start-title">Click START Meeps (˶˃ ᵕ ˂˶)</h1>
-      <button id="startBtn">Start</button>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bebsicola Valentines</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="rotateWarning">
+      Rotate your phone to landscape
     </div>
-  </div>
+    <div id="background"></div>
 
-  <div id="game">
-     <div id="app">
-      <div id="scene">
-        <div id="dragonContainer" class="character-container">
-          <img id="dragonImage" class="character" />
-        </div>
+    <div id="startScreen">
+      <div id="startContent">
+        <h1 class="start-title">Click START Meeps (˶˃ ᵕ ˂˶)</h1>
+        <button id="startBtn">Start</button>
+      </div>
+    </div>
 
-        <div id="barthyContainer" class="character-container left">
-          <img id="barthyImage" class="character" />
-          <div id="barthyBox" class="dialogue-box left hidden">
-            <p id="barthyText"></p>
+    <div id="game">
+      <div id="app">
+        <div id="scene">
+          <div id="dragonContainer" class="character-container">
+            <img id="dragonImage" class="character" />
           </div>
-        </div>
 
-        <div id="meepsContainer" class="character-container right">
-          <img id="meepsImage" class="character" />
-          <div id="meepsBox" class="dialogue-box right hidden">
-            <p id="meepsText"></p>
+          <div id="barthyContainer" class="character-container left">
+            <img id="barthyImage" class="character" />
+            <div id="barthyBox" class="dialogue-box left hidden">
+              <p id="barthyText"></p>
+            </div>
           </div>
+
+          <div id="meepsContainer" class="character-container right">
+            <img id="meepsImage" class="character" />
+            <div id="meepsBox" class="dialogue-box right hidden">
+              <p id="meepsText"></p>
+            </div>
+          </div>
+
+          <img id="sceneImage" class="scene-image hidden" alt="Scene" />
         </div>
 
-        <img id="sceneImage" class="scene-image hidden" alt="Scene" />
+        <div id="choices">
+          <button id="yesBtn">Yes</button>
+          <button id="noBtn">No</button>
+        </div>
+
       </div>
 
-      <div id="choices">
-        <button id="yesBtn">Yes</button>
-        <button id="noBtn">No</button>
+      <div id="endScreen" class="hidden">
+        <div id="endTitle">THE END</div>
+        <button id="restartBtn">Restart</button>
       </div>
 
-    </div>
+      <div id="modal" class="hidden">
+        <div class="modal-content">
 
-    <div id="endScreen" class="hidden">
-      <div id="endTitle">THE END</div>
-      <button id="restartBtn">Restart</button>
-    </div>
+          <p id="modalText"></p>
 
-    <!-- Modal -->
-    <div id="modal" class="hidden">
+          <p id="modalError" style="
+            color: rgb(187, 50, 50);
+            font-size: 18px;
+            margin-top: 10px;
+            min-height: 22px;
+          "></p>
+
+          <div class="modal-buttons">
+            <button id="modalYes">Yes</button>
+            <button id="modalNo">No</button>
+          </div>
+
+        </div>
+      </div>
+
+    <div id="captchaModal" class="hidden">
       <div class="modal-content">
+        <p id="captchaQuestion">
+          What is Barthy's favorite Meeps?
+        </p>
 
-        <p id="modalText"></p>
-
-        <p id="modalError" style="
-          color: red;
-          font-size: 18px;
-          margin-top: 10px;
-          min-height: 22px;
-        "></p>
-
-        <div class="modal-buttons">
-          <button id="modalYes">Yes</button>
-          <button id="modalNo">No</button>
+        <div class="captcha-options">
+          <button class="captchaOption">A) Meeps</button>
+          <button class="captchaOption">B) Meeps</button>
+          <button class="captchaOption">C) Meeps</button>
+          <button class="captchaOption correct">D) All of the above</button>
         </div>
 
+        <p id="captchaError" style="color:rgb(187, 50, 50); margin-top:10px;"></p>
       </div>
     </div>
 
+    <audio id="bgMusic" src="assets/background_music.mp3" loop></audio>
+    <audio id="yaySound" src="assets/yay_sound_effect.mp3" preload="auto"></audio>
+    <audio id="lonelyAudio" src="assets/lonely.mp3" preload="auto"></audio>
+    <audio id="slipSound" src="assets/slip_sound_effect.mp3" preload="auto"></audio>
+    <audio id="dragonSound" src="assets/dragon.mp3" preload="auto"></audio>
 
-  <div id="captchaModal" class="hidden">
-    <div class="modal-content">
-      <p id="captchaQuestion">
-        What is Barthy's favorite Meeps?
-      </p>
-
-      <div class="captcha-options">
-        <button class="captchaOption">A) Meeps</button>
-        <button class="captchaOption">B) Meeps</button>
-        <button class="captchaOption">C) Meeps</button>
-        <button class="captchaOption correct">D) All of the above</button>
-      </div>
-
-      <p id="captchaError" style="color:red; margin-top:10px;"></p>
-    </div>
-  </div>
-
-
-  <audio id="bgMusic" src="assets/background_music.mp3" loop></audio>
-  <audio id="yaySound" src="assets/yay_sound_effect.mp3" preload="auto"></audio>
-  <audio id="lonelyAudio" src="assets/lonely.mp3" preload="auto"></audio>
-  <audio id="slipSound" src="assets/slip_sound_effect.mp3" preload="auto"></audio>
-  <audio id="dragonSound" src="assets/dragon.mp3" preload="auto"></audio>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="script.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>
